@@ -9,27 +9,30 @@
 ## Instrucciones de Ejecución en Google Colab
 1. Clonar el repositorio, copiando y ejecutando lo siguiente:
    
-   !git clone https://github.com/juandacacua-gif/agente-consultoria.git
+   `!git clone https://github.com/juandacacua-gif/agente-consultoria.git`
    
-   %cd agente-consultoria
+   `%cd agente-consultoria`
    
 2. Instalar dependencias copiando y ejecutando:
    
-   "!pip install -r requirements.txt"
+   `!pip install -r requirements.txt`
    
 3. Crear un archivo '.env' con la variable 'GEMINI_API_KEY' usando este codigo:
    
-   with open('.env', 'w') as f:
-    f.write('GEMINI_API_KEY=AQUÍ_VA_EL_CODIGO')
+   `with open('.env', 'w') as f:`
    
-    print("✅ Archivo .env creado exitosamente.")
+   `f.write('GEMINI_API_KEY=AQUÍ_VA_EL_CODIGO')`
    
+    `print("✅ Archivo .env creado exitosamente.")`
+
 4. Subir el archivo csv que se desea analizar, ejecutando este codigo:
-   from google.colab import files
    
-   print("Sube aquí tu archivo CSV (ej. el de Kaggle RSNA Lumbar Spine):")
+   `from google.colab import files`
    
-   uploaded = files.upload()
+   `print("Sube aquí tu archivo CSV (ej. el de Kaggle RSNA Lumbar Spine):")`
+   
+   `uploaded = files.upload()`
+   
 5. Ejecutar el script, ejecutando el codigo:
    `!python main.py`
   
