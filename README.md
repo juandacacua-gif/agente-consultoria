@@ -7,7 +7,7 @@
 4. Ejecutar el script: `python main.py`
 
 ## Arquitectura y Decisiones de Recursos
-* **Elección de Modelo:** Se utilizó la API de Gemini 1.5 Pro.
+* **Elección de Modelo:** Se utilizó la API de Gemini 3.6 Flash.
 * **Justificación:** Se descartó cuantización local (ej. Mistral Q4_K_M) debido a la alta latencia en hardware estándar y la posible pérdida de precisión al generar código en R. La API ofrece memoria virtual ilimitada para el usuario local y protege los datos médicos al usar bases de datos ya anonimizadas (Kaggle RSNA).
 
 ## Versionado de Prompts
