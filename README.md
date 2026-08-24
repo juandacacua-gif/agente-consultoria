@@ -34,6 +34,7 @@
    `uploaded = files.upload()`
    
 5. Ejecutar el script, ejecutando el codigo:
+   
    `!python main.py`
   
 
