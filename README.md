@@ -29,7 +29,7 @@
    
    `from google.colab import files`
    
-   `print("Sube aquí tu archivo CSV (ej. el de Kaggle RSNA Lumbar Spine):")`
+   `print("Sube aquí tu archivo CSV:")`
    
    `uploaded = files.upload()`
    
