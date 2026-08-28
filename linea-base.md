@@ -40,7 +40,7 @@
 |---|---|---|---|
 | Tiempo total | 45 min | 2 min | **~95% de reducción del tiempo** |
 | Decisión Metodológica | Duda alta riesgo de error Tipo I / II | Regla aplicada sin dudar | El agente impone rigor estadístico de manera automatizada |
-| Resiliencia de Infraestructura | Humano lidiando con foros | Degradación controlada / Reintentos | Evidencia real de la arquitectura del script en Python |
+| Resiliencia de Infraestructura | Busqueda muy larga y tediosa en foros | Degradación controlada / Reintentos | Evidencia real de la arquitectura del script en Python |
 | Entregable | Texto plano / Script sucio | Código R limpio + Informe LaTeX | Salida estandarizada lista para publicación |
 
 ## Limitaciones identificadas (Guardrails)
