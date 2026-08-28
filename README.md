@@ -41,7 +41,7 @@
 
 6. Para compilar el informe LaTeX despues de solicitarlo, ejecutar este codigo:
 
-   `!pdflatex informe_clinico.tex`
+   `!pdflatex -interaction=nonstopmode informe_clinico.tex`
   
 
 ## Arquitectura y Decisiones de Recursos
