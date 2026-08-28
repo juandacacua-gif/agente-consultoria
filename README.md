@@ -13,9 +13,11 @@
    
    `%cd agente-consultoria`
    
-2. Instalar dependencias copiando y ejecutando:
+2. Instalar dependencias y LaTeX para informes, copiando y ejecutando:
    
    `!pip install -r requirements.txt`
+
+   `!sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra`
    
 3. Crear un archivo '.env' con la variable 'GEMINI_API_KEY' usando este codigo:
    
@@ -36,6 +38,10 @@
 5. Ejecutar el script, ejecutando el codigo:
    
    `!python main.py`
+
+6. Para compilar el informe LaTeX despues de solicitarlo, ejecutar este codigo:
+
+   `!pdflatex informe_clinico.tex`
   
 
 ## Arquitectura y Decisiones de Recursos
