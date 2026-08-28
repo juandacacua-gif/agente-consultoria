@@ -65,7 +65,6 @@ def iniciar_agente():
             contexto_datos = "" 
             
         try:
-            try:
             print("Consultando a la IA...")
             response = chat.send_message(user_input)
             print("\n🤖 Bioestadístico:")
