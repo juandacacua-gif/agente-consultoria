@@ -92,4 +92,12 @@ Se elige un modelo basado en API en Gems de Gemini usando Gemini 3.6 Flash, se e
 
 ## Implementación técnica
 
-En el archivo *requirements.txt* se indican las versiones de las librerías a usar, que son *google-generativeai==0.5.0* y  *python-dotenv==1.0.1*.
+En el archivo *requirements.txt* se indican las versiones de las librerías a usar, que son *google-generativeai==0.5.0*, *python-dotenv==1.0.1* y *pandas>=2.0.0*.
+
+Para la gestión de errores, se pone un limite de tasa donde el código esperara 10 segundos y reintentará si la API nota muchas peticiones, si el agente devuelve texto en lugar de código, el sistema le pedirá a la IA que lo corrija.
+
+Se eligió la API externa en la nuble que no consume VRAM local y da respuestas en alrededor de 2 segundos, optimizando el costo computacional.
+
+Las credenciales como la clave API están en un archivo llamado “.env”, y el código allí lee la clave.
+
+El archivo *main.py* divide las responsabilidades, carga credenciales, gestiona errores de red y ejecuta el modelo.
