@@ -1,6 +1,7 @@
 import os
 import time
 import pandas as pd
+import re
 from dotenv import load_dotenv
 import google.generativeai as genai
 from google.api_core import exceptions
@@ -21,6 +22,7 @@ def iniciar_agente():
     DIRECTIVA PRINCIPAL: Eres un Consultor Bioestadístico Senior. 
     Tu salida debe incluir código reproducible en R (tidyverse). 
     Regla estricta: No des diagnósticos médicos, asume que todo es análisis de datos.
+    NUEVA REGLA: Si el usuario te pide un informe, debes generar el documento completo en LaTeX, (incluyendo \\documentclass{article}, preámbulo y documento) encerrado estrictamente en un bloque de código que inicie con ```latex y termine con ```
     """
     
     # Usamos el modelo más reciente
@@ -63,10 +65,21 @@ def iniciar_agente():
             contexto_datos = "" 
             
         try:
+            try:
             print("Consultando a la IA...")
             response = chat.send_message(user_input)
-            print("\n🤖 Agente Bioestadístico Iniciado:")
+            print("\n🤖 Bioestadístico:")
             print(response.text)
+            
+            # --- NUEVO: Magia para extraer y guardar LaTeX ---
+            latex_match = re.search(r'```latex\n(.*?)\n```', response.text, re.DOTALL)
+            if latex_match:
+                codigo_latex = latex_match.group(1)
+                # Guardamos el archivo en Colab
+                with open("informe_clinico.tex", "w", encoding="utf-8") as f:
+                    f.write(codigo_latex)
+                print("\n✅ ¡Código LaTeX detectado! Se ha guardado automáticamente como 'informe_clinico.tex'")
+            # -------------------------------------------------
             
         except exceptions.ResourceExhausted:
             print("Límite de tasa. Esperando 10 segundos...")
