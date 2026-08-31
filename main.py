@@ -70,8 +70,19 @@ def iniciar_agente():
             response = chat.send_message(user_input)
             print("\n🤖 Bioestadístico:")
             print(response.text)
+
+            # --- Extraer y guardar R ---
+            # Busca un bloque de código que empiece con ```r o ```R
+            r_match = re.search(r'```[rR]\n(.*?)\n```', response.text, re.DOTALL)
+            if r_match:
+                codigo_r = r_match.group(1)
+                # Guardamos el archivo en Colab
+                with open("script_analisis.R", "w", encoding="utf-8") as f:
+                    f.write(codigo_r)
+                print("\n✅ ¡Código R detectado! Se ha guardado automáticamente como 'script_analisis.R'")
+            # ---------------------------------------------
             
-            # --- NUEVO: Magia para extraer y guardar LaTeX ---
+            # --- Extraer y guardar LaTeX ---
             latex_match = re.search(r'```latex\n(.*?)\n```', response.text, re.DOTALL)
             if latex_match:
                 codigo_latex = latex_match.group(1)
