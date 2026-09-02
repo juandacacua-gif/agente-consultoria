@@ -41,7 +41,7 @@ if "chat" not in st.session_state:
     (aquí va tu contenido)
     \\end{document}
     """
-    model = genai.GenerativeModel('gemini-3.6-pro', system_instruction=system_instruction)
+    model = genai.GenerativeModel('gemini-3.6-flash', system_instruction=system_instruction)
     st.session_state.chat = model.start_chat(history=[])
     st.session_state.mensajes = [] # Para dibujar el chat en pantalla
     st.session_state.contexto_enviado = False
