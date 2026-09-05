@@ -23,7 +23,7 @@ with st.sidebar:
     if uploaded_file is not None:
         nombre_archivo = uploaded_file.name
         
-        # Detección automática del formato (CORREGIDO LA INDENTACIÓN)
+        # Detección automática del formato
         if nombre_archivo.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
         elif nombre_archivo.endswith(('.xlsx', '.xls')):
@@ -44,7 +44,7 @@ if "chat" not in st.session_state:
     PERSONALIDAD: Tienes un tono cálido, muy amable, empático y accesible. Hablas como un colega cercano o un mentor. Usa un lenguaje natural y conversacional.
     Tu salida debe incluir código reproducible en R (tidyverse). 
     Regla estricta: No des diagnósticos médicos, asume que todo es análisis de datos.
-    NUEVA REGLA: Si el usuario te pide un informe en LaTeX, debes generar el documento completo encerrado estrictamente en un bloque de código que inicie con ```latex y termine con ```.
+    NUEVA REGLA: Si el usuario te pide un informe en LaTeX, debes generar el documento completo encerrado strictly en un bloque de código que inicie con ```latex y termine con ```.
     REGLA DE SINTAXIS LATEX: DEBES usar siempre exactamente este preámbulo:
     \\documentclass{article}
     \\usepackage[utf8]{inputenc}
@@ -59,10 +59,36 @@ if "chat" not in st.session_state:
     st.session_state.contexto_enviado = False
 
 # =====================================================================
-# NUEVO PASO: Pestaña de Exploración de Datos (EDA)
+# NUEVO PASO: Opción para Exportar el Chat (Barra Lateral)
+# =====================================================================
+if st.session_state.mensajes:
+    with st.sidebar:
+        st.markdown("---")
+        st.header("💾 Exportar Sesión")
+        
+        # Generar contenido en formato Markdown
+        historial_md = "# 🩺 Reporte de Consultoría Bioestadística\n\n"
+        historial_md += f"**Fecha:** {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+        if uploaded_file is not None:
+            historial_md += f"**Dataset Analizado:** `{uploaded_file.name}`\n\n"
+        historial_md += "---\n\n"
+        
+        for msg in st.session_state.mensajes:
+            rol = "👤 **Usuario**" if msg["role"] == "user" else "🩺 **Consultor Bioestadístico AI**"
+            historial_md += f"### {rol}\n\n{msg['content']}\n\n---\n\n"
+        
+        # Botón de descarga
+        st.sidebar.download_button(
+            label="📥 Descargar Historial (.md)",
+            data=historial_md,
+            file_name="historial_consultoria_bioestadistica.md",
+            mime="text/markdown"
+        )
+
+# =====================================================================
+# Pestaña de Exploración de Datos (EDA)
 # =====================================================================
 if df is not None:
-    # st.expander crea una cajita que se puede abrir y cerrar
     with st.expander("🔍 Exploración preliminar del dataset", expanded=False):
         tab1, tab2 = st.tabs(["Tabla de Datos", "Resumen Estadístico"])
         
@@ -73,16 +99,14 @@ if df is not None:
         with tab2:
             st.markdown("**Estadísticas descriptivas automáticas:**")
             st.write(df.describe(include='all'))
-# =====================================================================
 
 # 4. Dibujar el historial del chat
 for msg in st.session_state.mensajes:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# 5. Entrada del usuario (Caja de chat)
 # =====================================================================
-# NUEVO PASO: Botones de Preguntas Rápidas (Quick Prompts)
+# Botones de Preguntas Rápidas (Quick Prompts)
 # =====================================================================
 st.markdown("💡 **Sugerencias de análisis:**")
 col_btn1, col_btn2, col_btn3 = st.columns(3)
