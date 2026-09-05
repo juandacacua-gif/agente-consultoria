@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import google.generativeai as genai
 import re
+import os
+import subprocess
 
 # 1. Configuración de la página
 st.set_page_config(page_title="Agente Bioestadístico", page_icon="🩺", layout="wide")
@@ -15,7 +17,17 @@ with st.sidebar:
     api_key = st.text_input("Ingresa tu GEMINI_API_KEY", type="password")
     st.markdown("---")
     st.header("📁 Datos")
-    uploaded_file = st.file_uploader("Sube tu dataset (CSV)", type="csv")
+    uploaded_file = st.file_uploader("Sube tu dataset (CSV, Excel)", type=["csv", "xlsx", "xls"])
+
+    df = None # Inicializamos la variable vacía por seguridad
+    if uploaded_file is not None:
+        nombre_archivo = uploaded_file.name
+        
+        # Detección automática del formato (CORREGIDO LA INDENTACIÓN)
+        if nombre_archivo.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        elif nombre_archivo.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(uploaded_file)
 
 # Detenemos la app si no hay clave
 if not api_key:
@@ -43,8 +55,25 @@ if "chat" not in st.session_state:
     """
     model = genai.GenerativeModel('gemini-3.6-flash', system_instruction=system_instruction)
     st.session_state.chat = model.start_chat(history=[])
-    st.session_state.mensajes = [] # Para dibujar el chat en pantalla
+    st.session_state.mensajes = [] 
     st.session_state.contexto_enviado = False
+
+# =====================================================================
+# NUEVO PASO: Pestaña de Exploración de Datos (EDA)
+# =====================================================================
+if df is not None:
+    # st.expander crea una cajita que se puede abrir y cerrar
+    with st.expander("🔍 Exploración preliminar del dataset", expanded=False):
+        tab1, tab2 = st.tabs(["Tabla de Datos", "Resumen Estadístico"])
+        
+        with tab1:
+            st.markdown(f"**Vista previa de las primeras filas (Total: {df.shape[0]} filas, {df.shape[1]} columnas)**")
+            st.dataframe(df.head(10), use_container_width=True)
+            
+        with tab2:
+            st.markdown("**Estadísticas descriptivas automáticas:**")
+            st.write(df.describe(include='all'))
+# =====================================================================
 
 # 4. Dibujar el historial del chat
 for msg in st.session_state.mensajes:
@@ -59,13 +88,13 @@ if prompt := st.chat_input("Ej: ¿Qué prueba estadística me recomiendas para e
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Lógica oculta para leer el CSV y enviárselo a la IA
+    # Lógica oculta para leer el CSV/Excel y enviárselo a la IA
     mensaje_llm = prompt
-    if uploaded_file is not None and not st.session_state.contexto_enviado:
-        df = pd.read_csv(uploaded_file)
+    if df is not None and not st.session_state.contexto_enviado:
+        # CORRECCIÓN: Ya no usamos pd.read_csv aquí, usamos el 'df' que ya existe
         columnas = list(df.columns)
         mensaje_llm += f"\n\n[Nota oculta para la IA: El usuario subió un dataset llamado '{uploaded_file.name}'. Las columnas son: {columnas}. Úsalas en tu código R.]"
-        st.session_state.contexto_enviado = True # Para no enviarlo en cada mensaje
+        st.session_state.contexto_enviado = True 
 
     # Consultar a la IA
     with st.chat_message("assistant"):
@@ -84,9 +113,36 @@ if prompt := st.chat_input("Ej: ¿Qué prueba estadística me recomiendas para e
                 if r_match:
                     with col1:
                         st.download_button(label="⬇️ Descargar script_analisis.R", data=r_match.group(1), file_name="script_analisis.R", mime="text/plain")
+                
+                # CORRECCIÓN: Indentación arreglada en el bloque col2
                 if latex_match:
                     with col2:
-                        st.download_button(label="⬇️ Descargar informe_clinico.tex", data=latex_match.group(1), file_name="informe_clinico.tex", mime="text/plain")
+                        codigo_latex = latex_match.group(1)
+                        
+                        # Guardamos el archivo .tex
+                        with open("informe_clinico.tex", "w", encoding="utf-8") as f:
+                            f.write(codigo_latex)
+                        
+                        # Magia en segundo plano: Ejecutamos el compilador
+                        subprocess.run(["pdflatex", "-interaction=nonstopmode", "informe_clinico.tex"], capture_output=True)
+                        
+                        # Botón para descargar el código fuente (.tex)
+                        st.download_button(
+                            label="⬇️ Descargar informe.tex", 
+                            data=codigo_latex, 
+                            file_name="informe_clinico.tex", 
+                            mime="text/plain"
+                        )
+                        
+                        # Si el PDF se creó con éxito, mostramos el botón de descarga
+                        if os.path.exists("informe_clinico.pdf"):
+                            with open("informe_clinico.pdf", "rb") as pdf_file:
+                                st.download_button(
+                                    label="📄 Descargar PDF listo", 
+                                    data=pdf_file.read(), 
+                                    file_name="informe_clinico.pdf", 
+                                    mime="application/pdf"
+                                )
                         
             except Exception as e:
                 st.error(f"Error en la comunicación con la API: {e}")
