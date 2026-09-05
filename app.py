@@ -81,17 +81,36 @@ for msg in st.session_state.mensajes:
         st.markdown(msg["content"])
 
 # 5. Entrada del usuario (Caja de chat)
-if prompt := st.chat_input("Ej: ¿Qué prueba estadística me recomiendas para estos datos?"):
+# =====================================================================
+# NUEVO PASO: Botones de Preguntas Rápidas (Quick Prompts)
+# =====================================================================
+st.markdown("💡 **Sugerencias de análisis:**")
+col_btn1, col_btn2, col_btn3 = st.columns(3)
+
+prompt_rapido = None
+if col_btn1.button("📊 Sugerir prueba estadística"):
+    prompt_rapido = "Recomiéndame la prueba de hipótesis adecuada para evaluar la variable principal de estos datos."
+if col_btn2.button("📉 Validar normalidad"):
+    prompt_rapido = "Genera el código en R para verificar si las variables numéricas cumplen el supuesto de normalidad."
+if col_btn3.button("📄 Generar informe LaTeX"):
+    prompt_rapido = "Haz un análisis completo de mis datos, interpreta los resultados y redacta el informe formal en LaTeX."
+
+# 5. Entrada del usuario (Caja de chat o Botones)
+prompt_usuario = st.chat_input("Escribe tu propia consulta estadística...")
+
+# Tomamos lo que el usuario escribió, o lo que presionó en el botón
+prompt_final = prompt_usuario or prompt_rapido
+
+if prompt_final:
     
-    # Mostramos el mensaje del usuario
-    st.session_state.mensajes.append({"role": "user", "content": prompt})
+    # Mostramos el mensaje del usuario en pantalla
+    st.session_state.mensajes.append({"role": "user", "content": prompt_final})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(prompt_final)
 
     # Lógica oculta para leer el CSV/Excel y enviárselo a la IA
-    mensaje_llm = prompt
+    mensaje_llm = prompt_final
     if df is not None and not st.session_state.contexto_enviado:
-        # CORRECCIÓN: Ya no usamos pd.read_csv aquí, usamos el 'df' que ya existe
         columnas = list(df.columns)
         mensaje_llm += f"\n\n[Nota oculta para la IA: El usuario subió un dataset llamado '{uploaded_file.name}'. Las columnas son: {columnas}. Úsalas en tu código R.]"
         st.session_state.contexto_enviado = True 
@@ -114,7 +133,6 @@ if prompt := st.chat_input("Ej: ¿Qué prueba estadística me recomiendas para e
                     with col1:
                         st.download_button(label="⬇️ Descargar script_analisis.R", data=r_match.group(1), file_name="script_analisis.R", mime="text/plain")
                 
-                # CORRECCIÓN: Indentación arreglada en el bloque col2
                 if latex_match:
                     with col2:
                         codigo_latex = latex_match.group(1)
