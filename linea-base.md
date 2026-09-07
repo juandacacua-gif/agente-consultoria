@@ -15,7 +15,7 @@
 | Decidir qué prueba estadística usar (riesgo de sesgo) | 10 min |
 | Escribir el código para validar supuestos en R | 10 min |
 | Ejecutar la prueba y lidiar con errores de sintaxis | 5 min |
-| Redactar interpretación formal / Formato LaTeX | 15 min |
+| Redactar interpretación formal / Formato HTML | 15 min |
 | **TOTAL** | **45 min** |
 
 **Observaciones registradas durante el proceso manual:**
@@ -27,12 +27,12 @@
 
 | Etapa | Tiempo |
 |---|---|
-| Ejecución completa (Lectura de CSV, decisión, código R y reporte LaTeX) | 2 min |
+| Ejecución completa (Lectura de dataset, decisión, código R y reporte) | 2 min |
 
 **Observaciones registradas durante la ejecución del agente:**
 - **Decisión metodológica determinística:** Gracias a las directivas del sistema (System Instructions), el agente detectó la naturaleza de los datos y recomendó inmediatamente evitar pruebas basadas en medias, proporcionando el código correcto para análisis no paramétrico.
 - **Manejo de errores de red:** Durante la iteración del desarrollo, la API devolvió errores `ResourceExhausted` (Límite de tasa por capa gratuita). El bloque `try-except` del script gestionó el fallo aplicando un `time.sleep(10)` y reintentando sin que el programa colapsara. El usuario final no experimentó cierres inesperados.
-- **Generación documental:** El agente fue capaz de aislar el código LaTeX del resto de la conversación y guardarlo automáticamente en un archivo `.tex` local listo para compilar.
+- **Generación documental:** El agente fue capaz de aislar el código HTML del resto de la conversación y guardarlo automáticamente en un archivo `.pdf` local listo para compilar.
 
 ## Comparación
 
@@ -41,7 +41,7 @@
 | Tiempo total | 45 min | 2 min | **~95% de reducción del tiempo** |
 | Decisión Metodológica | Duda alta riesgo de error Tipo I / II | Regla aplicada sin dudar | El agente impone rigor estadístico de manera automatizada |
 | Resiliencia de Infraestructura | Busqueda muy larga y tediosa en foros | Degradación controlada / Reintentos | Evidencia real de la arquitectura del script en Python |
-| Entregable | Texto plano / Script sucio | Código R limpio + Informe LaTeX | Salida estandarizada lista para publicación |
+| Entregable | Texto plano / Script sucio | Código R limpio + Informe | Salida estandarizada lista para publicación |
 
 ## Limitaciones identificadas (Guardrails)
 
@@ -49,4 +49,4 @@ El proceso manual permite el juicio clínico profundo ante datos altamente compl
 
 ## Nota metodológica
 
-Esta línea base se construyó documentando el proceso teórico de un investigador médico sin conocimientos avanzados de programación en R. Los tiempos de la línea base reflejan el "costo" de buscar sintaxis en foros y dudar sobre la metodología (fricciones reales de la disciplina). El tiempo del agente es una medición real de la latencia de la API de Gemini 2.5 Flash sumado al tiempo de tipeo del prompt.
+Esta línea base se construyó documentando el proceso teórico de un investigador médico sin conocimientos avanzados de programación en R. Los tiempos de la línea base reflejan el "costo" de buscar sintaxis en foros y dudar sobre la metodología (fricciones reales de la disciplina).
