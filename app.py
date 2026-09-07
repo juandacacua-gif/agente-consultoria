@@ -8,7 +8,7 @@ import subprocess
 # 1. Configuración de la página
 st.set_page_config(page_title="Agente Bioestadístico", page_icon="🩺", layout="wide")
 st.title("🩺 Consultor Bioestadístico Clínico AI")
-st.markdown("Sube tu dataset, haz preguntas estadísticas y obtén código R e informes LaTeX listos para descargar.")
+st.markdown("Sube tu dataset, haz preguntas estadísticas y obtén código R e informes HTML listos para descargar.")
 
 # 2. Barra lateral (Sidebar) para configuraciones y datos
 with st.sidebar:
@@ -37,16 +37,9 @@ if "chat" not in st.session_state:
     system_instruction = """
     DIRECTIVA PRINCIPAL: Eres un Consultor Bioestadístico Senior. 
     PERSONALIDAD: Tienes un tono cálido, muy amable, empático y accesible. Hablas como un colega cercano o un mentor. Usa un lenguaje natural y conversacional.
-    Tu salida debe incluir código reproducible en R (tidyverse). 
+    Tu salida debe incluir código reproducible en R, con las lineas para instalar y cargar los paquetes requeridos. 
     Regla estricta: No des diagnósticos médicos, asume que todo es análisis de datos.
-    NUEVA REGLA: Si el usuario te pide un informe en LaTeX, debes generar el documento completo encerrado estrictamente en un bloque de código que inicie con ```latex y termine con ```.
-    REGLA DE SINTAXIS LATEX: DEBES usar siempre exactamente este preámbulo:
-    \\documentclass{article}
-    \\usepackage[utf8]{inputenc}
-    \\usepackage[spanish]{babel}
-    \\begin{document}
-    (aquí va tu contenido)
-    \\end{document}
+    NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe formal, debes generarlo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
     """
     model = genai.GenerativeModel('gemini-3.6-flash', system_instruction=system_instruction)
     st.session_state.chat = model.start_chat(history=[])
@@ -131,8 +124,8 @@ if col_btn1.button("📊 Sugerir prueba estadística"):
     prompt_rapido = "Recomiéndame la prueba de hipótesis adecuada para evaluar la variable principal de estos datos."
 if col_btn2.button("📉 Validar normalidad"):
     prompt_rapido = "Genera el código en R para verificar si las variables numéricas cumplen el supuesto de normalidad."
-if col_btn3.button("📄 Generar informe LaTeX"):
-    prompt_rapido = "Haz un análisis completo de mis datos, interpreta los resultados y redacta el informe formal en LaTeX."
+if col_btn3.button("📄 Generar informe HTML"):
+    prompt_rapido = "Haz un análisis completo de mis datos, interpreta los resultados y redacta el informe formal en HTML."
 
 # 5. Entrada del usuario (Caja de chat o Botones)
 prompt_usuario = st.chat_input("Escribe tu propia consulta estadística...")
@@ -158,23 +151,28 @@ if prompt_final:
                 st.session_state.mensajes.append({"role": "assistant", "content": respuesta_ia})
                 
                 r_match = re.search(r'```[rR]\n(.*?)\n```', respuesta_ia, re.DOTALL)
-                latex_match = re.search(r'```latex\n(.*?)\n```', respuesta_ia, re.DOTALL)
+                html_match = re.search(r'```html\n(.*?)\n```', respuesta_ia, re.DOTALL)
                 
                 col1, col2 = st.columns(2)
                 if r_match:
                     with col1:
-                        st.download_button(label="⬇️ Descargar script_analisis.R", data=r_match.group(1), file_name="script_analisis.R", mime="text/plain")
+                        st.download_button(
+                            label="⬇️ Descargar script_analisis.R", 
+                            data=r_match.group(1), 
+                            file_name="script_analisis.R", 
+                            mime="text/plain"
+                        )
                 
-                if latex_match:
+                if html_match:
                     with col2:
-                        codigo_latex = latex_match.group(1)
-                        with open("informe_clinico.tex", "w", encoding="utf-8") as f:
-                            f.write(codigo_latex)
-                        subprocess.run(["pdflatex", "-interaction=nonstopmode", "informe_clinico.tex"], capture_output=True)
-                        st.download_button(label="⬇️ Descargar informe.tex", data=codigo_latex, file_name="informe_clinico.tex", mime="text/plain")
-                        if os.path.exists("informe_clinico.pdf"):
-                            with open("informe_clinico.pdf", "rb") as pdf_file:
-                                st.download_button(label="📄 Descargar PDF listo", data=pdf_file.read(), file_name="informe_clinico.pdf", mime="application/pdf")
+                        codigo_html = html_match.group(1)
+                        st.download_button(
+                            label="🌐 Descargar informe.html", 
+                            data=codigo_html, 
+                            file_name="informe_clinico.html", 
+                            mime="text/html"
+                        )
+                        st.info("💡 Abre este archivo en tu navegador y presiona **Ctrl + P** -> **Guardar como PDF** para obtener tu documento impreso perfecto.")
                         
             except Exception as e:
                 st.error(f"Error en la comunicación con la API: {e}")
