@@ -3,7 +3,6 @@ import pandas as pd
 import google.generativeai as genai
 import re
 import os
-import subprocess
 
 # 1. Configuración de la página
 st.set_page_config(page_title="Agente Bioestadístico", page_icon="🩺", layout="wide")
