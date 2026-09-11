@@ -1,0 +1,447 @@
+{\rtf1\fbidis\ansi\ansicpg1252\deff0\nouicompat\deflang3082{\fonttbl{\f0\fnil\fcharset1 Segoe UI Emoji;}{\f1\fnil\fcharset0 Calibri;}{\f2\fnil\fcharset1 Segoe UI Symbol;}{\f3\fnil Calibri;}{\f4\fnil\fcharset1 Segoe UI Symbol;}{\f5\fnil\fcharset1 Cambria Math;}}
+{\*\generator Riched20 10.0.18362}{\*\mmathPr\mmathFont5\mwrapIndent1440 }\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang10\u-10178?\u-8582?\f1  Consultor Bioestad\'edstico Cl\'ednico AI\par
+Sube tu dataset, haz preguntas estad\'edsticas y obt\'e9n c\'f3digo R e informes HTML listos para descargar.\par
+\par
+\f2\u-10179?\u-8947?\f3  \f1 Exploraci\'f3n preliminar del dataset\par
+\par
+Hola, puedes Identificar datos faltantes, registros duplicados o inconsistencias en los niveles de severidad de el dataset CSV que he subido?\par
+\par
+\'a1Hola! Qu\'e9 gusto saludarte.\par
+\par
+Entiendo perfectamente lo crucial que es este paso. Antes de aventurarnos a realizar cualquier an\'e1lisis bioestad\'edstico o entrenar un modelo, la auditor\'eda y limpieza de datos (Quality Control) es el pilar fundamental. Un solo dato duplicado o una etiqueta mal escrita (como una errata en el nivel de severidad) puede distorsionar nuestras estimaciones sin que nos demos cuenta.\par
+\par
+Para revisar tu archivo train.csv, he preparado un script completo y reproducible en R. Este c\'f3digo examina exactamente las 26 columnas de tu dataset (el study_id y las 25 evaluaciones de las distintas condiciones en los niveles vertebrales L1-L2 a L5-S1) buscando:\par
+\par
+Registros duplicados (tanto filas id\'e9nticas como duplicaci\'f3n de study_id).\par
+Datos faltantes (NA) detallados por variable y en porcentaje.\par
+Inconsistencias en las categor\'edas de severidad (para verificar que todas sigan la convenci\'f3n esperada, por ejemplo: "Normal/Mild", "Moderate", "Severe", o si existen caracteres extra\'f1os/desconocidos).\par
+C\'f3digo en R para la Control de Calidad de Datos\par
+Puedes ejecutar este bloque directamente en tu entorno RStudio o R:\par
+\par
+# ==============================================================================\par
+# AUDITOR\'cdA DE CALIDAD DE DATOS (QC)\par
+# Proyecto: An\'e1lisis de Niveles de Severidad\par
+# ==============================================================================\par
+\par
+# 1. Instalaci\'f3n y carga de paquetes requeridos\par
+required_packages <- c("tidyverse", "janitor", "naniar")\par
+new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]\par
+if(length(new_packages)) install.packages(new_packages)\par
+\par
+library(tidyverse)\par
+library(janitor)\par
+library(naniar)\par
+\par
+# 2. Carga del conjunto de datos\par
+file_path <- "train.csv"\par
+\par
+if(!file.exists(file_path)) \{\par
+  stop("El archivo 'train.csv' no se encuentra en el directorio de trabajo actual.")\par
+\}\par
+\par
+df <- read_csv(file_path, show_col_types = FALSE)\par
+\par
+cat("========================================================\\n")\par
+cat("      INFORME PRELIMINAR DE CALIDAD DE DATOS           \\n")\par
+cat("========================================================\\n\\n")\par
+\par
+# ------------------------------------------------------------------------------\par
+# A. VERIFICACI\'d3N DE DUPLICADOS\par
+# ------------------------------------------------------------------------------\par
+total_rows <- nrow(df)\par
+total_cols <- ncol(df)\par
+unique_ids <- n_distinct(df$study_id)\par
+exact_duplicates <- sum(duplicated(df))\par
+id_duplicates <- sum(duplicated(df$study_id))\par
+\par
+cat("--> 1. RESUMEN DE DUPLICADOS:\\n")\par
+cat(" - Total de filas:", total_rows, "\\n")\par
+cat(" - Total de columnas:", total_cols, "\\n")\par
+cat(" - Identificadores \'fanicos (study_id):", unique_ids, "\\n")\par
+cat(" - Filas exactas duplicadas:", exact_duplicates, "\\n")\par
+cat(" - 'study_id' duplicados:", id_duplicates, "\\n\\n")\par
+\par
+if(id_duplicates > 0) \{\par
+  cat("\f0\u9888?\u-497?\f3  \f1 ALERTA: Existen 'study_id' repetidos. Muestra de IDs duplicados:\\n")\par
+  print(df %>% filter(duplicated(study_id) | duplicated(study_id, fromLast = TRUE)) %>% select(study_id) %>% head(6))\par
+  cat("\\n")\par
+\} else \{\par
+  cat("\f4\u10004?\f3  \f1 No se encontraron IDs duplicados.\\n\\n")\par
+\}\par
+\par
+# ------------------------------------------------------------------------------\par
+# B. VERIFICACI\'d3N DE DATOS FALTANTES (MISSING VALUES)\par
+# ------------------------------------------------------------------------------\par
+cat("--> 2. AUDITOR\'cdA DE DATOS FALTANTES (NA):\\n")\par
+\par
+missing_summary <- df %>%\par
+  summarise(across(everything(), ~sum(is.na(.)))) %>%\par
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "n_faltantes") %>%\par
+  mutate(porcentaje = round((n_faltantes / total_rows) * 100, 2)) %>%\par
+  filter(n_faltantes > 0) %>%\par
+  arrange(desc(n_faltantes))\par
+\par
+if(nrow(missing_summary) > 0) \{\par
+  cat("\f0\u9888?\u-497?\f3  \f1 Se encontraron datos faltantes en las siguientes variables:\\n")\par
+  print(missing_summary, n = 30)\par
+\} else \{\par
+  cat("\f4\u10004?\f3  \f1\'a1Excelente! No hay valores faltantes en ninguna columna.\\n")\par
+\}\par
+cat("\\n")\par
+\par
+# ------------------------------------------------------------------------------\par
+# C. AUDITOR\'cdA DE INCONSISTENCIAS EN LOS NIVELES DE SEVERIDAD\par
+# ------------------------------------------------------------------------------\par
+cat("--> 3. INCONSISTENCIAS EN VALORES DE SEVERIDAD:\\n")\par
+\par
+# Seleccionamos todas las columnas excepto el identificador\par
+condition_cols <- setdiff(names(df), "study_id")\par
+\par
+# Obtenemos los valores \'fanicos de severidad en todo el conjunto de datos\par
+severity_values <- df %>%\par
+  pivot_longer(cols = all_of(condition_cols), names_to = "condicion", values_to = "severidad") %>%\par
+  count(severidad, name = "frecuencia_total") %>%\par
+  mutate(porcentaje = round((frecuencia_total / (total_rows * length(condition_cols))) * 100, 2))\par
+\par
+cat("Valores \'fanicos detectados en las 25 columnas de condici\'f3n y sus frecuencias:\\n")\par
+print(severity_values)\par
+cat("\\n")\par
+\par
+# Comprobaci\'f3n de inconsistencias espec\'edficas (por ejemplo, textos imprevistos o espacios)\par
+expected_categories <- c("Normal/Mild", "Moderate", "Severe", NA)\par
+\par
+inconsistent_records <- df %>%\par
+  pivot_longer(cols = all_of(condition_cols), names_to = "condicion", values_to = "severidad") %>%\par
+  filter(!severidad %in% expected_categories)\par
+\par
+if(nrow(inconsistent_records) > 0) \{\par
+  cat("\f0\u9888?\u-497?\f3  \f1 ATENCI\'d3N: Se detectaron etiquetas de severidad no est\'e1ndar o erratas:\\n")\par
+  print(head(inconsistent_records, 10))\par
+\} else \{\par
+  cat("\f4\u10004?\f3  \f1 Todas las etiquetas corresponden a las categor\'edas est\'e1ndar esperadas.\\n")\par
+\}\par
+cat("\\n========================================================\\n")\par
+\'bfQu\'e9 nos dir\'e1 este an\'e1lisis cuando lo ejecutes?\par
+En la secci\'f3n de Duplicados: Sabremos de inmediato si hay re-evaluaciones del mismo estudio (study_id) o si por error se cargaron filas id\'e9nticas.\par
+En la secci\'f3n de Faltantes: Identificaremos si alguna localizaci\'f3n o tipo de lesi\'f3n (como las estenosis subarticulares o del canal neural) tiene mayor p\'e9rdida de informaci\'f3n. Esto es muy com\'fan en datos cl\'ednicos complejos cuando un corte o secuencia de imagen no estuvo disponible.\par
+En la secci\'f3n de Inconsistencias: Verificaremos que los valores sean limpios (por ejemplo, asegurarnos de que no coexistan etiquetas como "Normal", "normal/mild" o "Normal/Mild " con espacios invisibles al final).\par
+Ejecuta el c\'f3digo en tu entorno y dime qu\'e9 resultados te devuelve. Con gusto te gu\'edo paso a paso en las t\'e9cnicas de imputaci\'f3n o limpieza que sean m\'e1s id\'f3neas seg\'fan lo que encontremos. \'a1Estoy aqu\'ed para apoyarte!\par
+\par
+Ya corr\'ed todo este script, no hay duplicados ni inconsistencias, pero si hay algunos faltantes, esto es lo que arroja R: \f0\u9888?\u-497?\f3  \f1 Se encontraron datos faltantes en las siguientes variables:\par
+\par
+A tibble: 25 \'d7 3\par
+variable n_faltantes porcentaje <chr> <int> <dbl> 1 left_subarticular_stenosis_l1_l2 164 8.3 2 right_subarticular_stenosis_l1_l2 161 8.15 3 left_subarticular_stenosis_l2_l3 82 4.15 4 right_subarticular_stenosis_l2_l3 82 4.15 5 left_subarticular_stenosis_l5_s1 11 0.56 6 right_neural_foraminal_narrowing_l1_l2 8 0.41 7 right_neural_foraminal_narrowing_l2_l3 8 0.41 8 right_neural_foraminal_narrowing_l3_l4 8 0.41 9 right_neural_foraminal_narrowing_l4_l5 8 0.41 10 right_neural_foraminal_narrowing_l5_s1 8 0.41 11 right_subarticular_stenosis_l5_s1 7 0.35 12 left_subarticular_stenosis_l3_l4 3 0.15 13 left_subarticular_stenosis_l4_l5 3 0.15 14 left_neural_foraminal_narrowing_l1_l2 2 0.1 15 left_neural_foraminal_narrowing_l2_l3 2 0.1 16 left_neural_foraminal_narrowing_l3_l4 2 0.1 17 left_neural_foraminal_narrowing_l4_l5 2 0.1 18 left_neural_foraminal_narrowing_l5_s1 2 0.1 19 right_subarticular_stenosis_l3_l4 2 0.1 20 right_subarticular_stenosis_l4_l5 2 0.1 21 spinal_canal_stenosis_l1_l2 1 0.05 22 spinal_canal_stenosis_l2_l3 1 0.05 23 spinal_canal_stenosis_l3_l4 1 0.05 24 spinal_canal_stenosis_l4_l5 1 0.05 25 spinal_canal_stenosis_l5_s1 1 0.05\par
+\par
+\'a1Excelente trabajo al ejecutar el script! Qu\'e9 buena noticia que la base de datos est\'e9 tan limpia en cuanto a duplicados y nombres de etiquetas. Ese es un gran paso ganado.\par
+\par
+Ahora, analicemos juntos este patr\'f3n de datos faltantes, porque en bioestad\'edstica el "patr\'f3n" de los datos faltantes nos dice mucho m\'e1s que la simple cantidad.\par
+\par
+Diagn\'f3stico Bioestad\'edstico de los Datos Faltantes\par
+Si te fijas con detalle en el informe que obtuviste, hay patrones estructurales muy interesantes:\par
+\par
+P\'e9rdida por Serie/Secuencia Completa (Faltantes en bloque):\par
+\par
+Observa que right_neural_foraminal_narrowing tiene exactamente 8 faltantes en todos sus niveles (L1_L2 a L5_S1).\par
+Ocurre lo mismo con left_neural_foraminal_narrowing (2 faltantes en todos los niveles) y spinal_canal_stenosis (1 faltante en todos los niveles).\par
+Interpretaci\'f3n: Esto indica que para unos pocos pacientes en particular, la serie de im\'e1genes o la lectura de esa vista completa no estuvo disponible. Es un patr\'f3n Missing Completely at Random (MCAR) o Missing at Random (MAR) condicionado a la disponibilidad del estudio.\par
+P\'e9rdida Espec\'edfica por Nivel Anat\'f3mico:\par
+\par
+La mayor concentraci\'f3n de faltantes est\'e1 en la regi\'f3n superior subarticular (L1_L2 con ~8.3% y L2_L3 con ~4.15%).\par
+A medida que bajamos hacia L5_S1, los faltantes caen por debajo del 0.5%.\par
+Interpretaci\'f3n: Es muy com\'fan que en estudios de columna vertebral los cortes superiores no siempre queden perfectamente cubiertos en el campo de visi\'f3n de la prueba, lo que genera m\'e1s omisiones en L1_L2.\par
+Estrategias para Manejar estos Faltantes\par
+Dado que el porcentaje global de faltantes es relativamente bajo (el m\'e1ximo es 8.3%), tenemos 3 excelentes opciones metodol\'f3gicas:\par
+\par
+Imputaci\'f3n por Ecuaciones Encadenadas (MICE) / KNN (Recomendada):\par
+Dado que existe una fuerte correlaci\'f3n entre el lado izquierdo y derecho, y entre niveles contiguos (L1-L2 se parece a L2-L3), la imputaci\'f3n multivariada preserva la estructura biol\'f3gica subyacente de los datos.\par
+Imputaci\'f3n por la Moda / Valor M\'e1s Frecuente:\par
+Es r\'e1pida y v\'e1lida para variables con menos del 1% de faltantes (como las de 1 u 8 registros).\par
+Creaci\'f3n de una Categor\'eda "Desconocido" / "Missing":\par
+Si vas a usar modelos basados en \'e1rboles de decisi\'f3n (como XGBoost o Random Forest), a menudo es \'fatil tratar el valor faltante como una categor\'eda expl\'edcita.\par
+C\'f3digo en R para solucionar los Datos Faltantes\par
+Aqu\'ed tienes el script en R con dos enfoques pr\'e1cticos: Opci\'f3n A (Imputaci\'f3n por la Moda, simple y r\'e1pida) y Opci\'f3n B (Imputaci\'f3n Multivariada MICE, metodol\'f3gicamente robusta).\par
+\par
+# ==============================================================================\par
+# TRATAMIENTO DE DATOS FALTANTES\par
+# ==============================================================================\par
+\par
+# 1. Instalaci\'f3n y carga de paquetes requeridos\par
+required_packages <- c("tidyverse", "mice")\par
+new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]\par
+if(length(new_packages)) install.packages(new_packages)\par
+\par
+library(tidyverse)\par
+library(mice)\par
+\par
+# Aseg\'farate de tener cargado el dataset original\par
+# df <- read_csv("train.csv")\par
+\par
+# Convertimos las columnas de condici\'f3n a Factores (Categor\'edas)\par
+condition_cols <- setdiff(names(df), "study_id")\par
+\par
+df_factores <- df %>%\par
+  mutate(across(all_of(condition_cols), ~ factor(., levels = c("Normal/Mild", "Moderate", "Severe"))))\par
+\par
+\par
+# ------------------------------------------------------------------------------\par
+# OPCI\'d3N A: Imputaci\'f3n por la Moda (Simple, r\'e1pida para < 5-10% faltantes)\par
+# ------------------------------------------------------------------------------\par
+get_mode <- function(v) \{\par
+  uniqv <- unique(na.omit(v))\par
+  uniqv[which.max(tabulate(match(v, uniqv)))]\par
+\}\par
+\par
+df_imputed_mode <- df_factores %>%\par
+  mutate(across(all_of(condition_cols), ~ ifelse(is.na(.), as.character(get_mode(.)), as.character(.))))\par
+\par
+cat("\f4\u10004?\f3  \f1 Imputaci\'f3n por moda completada. Total faltantes restantes:", sum(is.na(df_imputed_mode)), "\\n")\par
+\par
+\par
+# ------------------------------------------------------------------------------\par
+# OPCI\'d3N B: Imputaci\'f3n Multivariada (MICE) - *RECOMENDADA*\par
+# Preserva la relaci\'f3n entre niveles y lados (izq/der)\par
+# ------------------------------------------------------------------------------\par
+cat("\\nIniciando Imputaci\'f3n Multivariada MICE (Polytomous Regression para datos ordinales/nominales)...\\n")\par
+\par
+# Ejecutamos MICE (usamos polyreg para variables categ\'f3ricas con >2 niveles)\par
+set.seed(123) # Para reproducibilidad\par
+mice_data <- mice(df_factores, m = 1, method = 'polyreg', printFlag = FALSE)\par
+\par
+# Extraemos el dataset completo e imputado\par
+df_imputed_mice <- complete(mice_data)\par
+\par
+cat("\f4\u10004?\f3  \f1 Imputaci\'f3n MICE completada exitosamente.\\n")\par
+cat("Total de NAs post-imputaci\'f3n MICE:", sum(is.na(df_imputed_mice)), "\\n")\par
+\par
+# ------------------------------------------------------------------------------\par
+# Guardar el dataset limpio\par
+# ------------------------------------------------------------------------------\par
+write_csv(df_imputed_mice, "train_limpio_imputado.csv")\par
+cat("\\n\f2\u-10179?\u-9026?\f3  \f1 Dataset limpio guardado exitosamente como 'train_limpio_imputado.csv'\\n")\par
+\'bfCu\'e1l te sugiero elegir?\par
+Te recomiendo utilizar la Opci\'f3n B (MICE). Al ser un problema donde los niveles adyacentes est\'e1n correlacionados (un paciente con severidad alta en L2_L3 tiene mayor probabilidad de tener cierta afectaci\'f3n en L1_L2), MICE utilizar\'e1 la informaci\'f3n del resto de la columna del paciente para predecir de forma inteligente el nivel que falta.\par
+\par
+\'bfC\'f3mo lo ves? Cu\'e9ntame si te gustar\'eda que procedamos a explorar distribuciones o estad\'edsticas descriptivas con tu dataset ya impecable.\par
+\par
+\f2\u-10179?\u-9055?\f3  \f1 Sugerencias de an\'e1lisis:\par
+\par
+Ya hice la imputaci\'f3n con la opci\'f3n B, ahora puedes ayudarme a hacer an\'e1lisis exploratorio, pruebas para evaluar la co-ocurrencia o la relaci\'f3n entre diferentes condiciones, con visualizaci\'f3n en gr\'e1ficos de barra y mapas de calor\par
+\par
+\'a1Fant\'e1stico! Haber completado la imputaci\'f3n con MICE garantiza que nuestros an\'e1lisis posteriores tengan la m\'e1xima validez y no pierdan potencia estad\'edstica.\par
+\par
+Ahora entramos en una de las fases m\'e1s emocionantes del trabajo bioestad\'edstico: el An\'e1lisis Exploratorio de Datos (EDA) y la evaluaci\'f3n de co-ocurrencia.\par
+\par
+\'bfQu\'e9 buscaremos en este an\'e1lisis?\par
+Distribuci\'f3n global de severidad (Gr\'e1ficos de barras): Comparar la prevalencia relativa de las categor\'edas (Normal/Mild, Moderate, Severe) a lo largo de las 25 condiciones.\par
+Mapa de Calor de Co-ocurrencia (Heatmap): Dado que los niveles de severidad son ordinales, mapearemos la severidad a una escala num\'e9rica (\par
+0\par
+=\par
+Normal/Mild\par
+0=Normal/Mild, \par
+1\par
+=\par
+Moderate\par
+1=Moderate, \par
+2\par
+=\par
+Severe\par
+2=Severe) para calcular la Correlaci\'f3n de Rangos de Spearman. Esto revelar\'e1 si la afectaci\'f3n en un nivel (p. ej., L1-L2) co-ocurre con niveles contiguos o con el lado contralateral (simetr\'eda izquierda/derecha).\par
+Pruebas Estad\'edsticas de Asociaci\'f3n: Calcularemos la V de Cram\'e9r (fuerza de asociaci\'f3n categ\'f3rica) y pruebas de Chi-cuadrado para confirmar cu\'e1les condiciones est\'e1n estad\'edsticamente interrelacionadas.\par
+C\'f3digo Completo en R para EDA y Co-ocurrencia\par
+Ejecuta el siguiente script en R. El c\'f3digo genera autom\'e1ticamente gr\'e1ficos de alta calidad con ggplot2 y realiza la matriz de asociaci\'f3n:\par
+\par
+# ==============================================================================\par
+# AN\'c1LISIS EXPLORATORIO (EDA) Y CO-OCURRENCIA DE CONDICIONES\par
+# ==============================================================================\par
+\par
+# 1. Instalaci\'f3n y carga de librer\'edas necesarias\par
+required_packages <- c("tidyverse", "rstatix", "reshape2", "viridis", "scales")\par
+new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]\par
+if(length(new_packages)) install.packages(new_packages)\par
+\par
+library(tidyverse)\par
+library(rstatix)\par
+library(reshape2)\par
+library(viridis)\par
+library(scales)\par
+\par
+# 2. Cargar el dataset imputado\par
+df_clean <- read_csv("train_limpio_imputado.csv", show_col_types = FALSE)\par
+\par
+# Definir variables de condici\'f3n (excluyendo el study_id)\par
+condition_cols <- setdiff(names(df_clean), "study_id")\par
+\par
+# Asegurar orden del factor\par
+severity_levels <- c("Normal/Mild", "Moderate", "Severe")\par
+df_clean <- df_clean %>%\par
+  mutate(across(all_of(condition_cols), ~ factor(., levels = severity_levels)))\par
+\par
+# ==============================================================================\par
+# A. GR\'c1FICO DE BARRAS: DISTRIBUCI\'d3N DE SEVERIDAD POR CONDICI\'d3N\par
+# ==============================================================================\par
+\par
+# Preparar datos en formato largo\par
+df_long <- df_clean %>%\par
+  pivot_longer(cols = all_of(condition_cols), names_to = "condicion", values_to = "severidad")\par
+\par
+# Calcular porcentajes por condici\'f3n\par
+df_distribucion <- df_long %>%\par
+  count(condicion, severidad) %>%\par
+  group_by(condicion) %>%\par
+  mutate(porcentaje = n / sum(n))\par
+\par
+# Graficar barras apiladas al 100%\par
+p_barras <- ggplot(df_distribucion, aes(x = reorder(condicion, porcentaje), y = porcentaje, fill = severidad)) +\par
+  geom_bar(stat = "identity", position = "fill", width = 0.7) +\par
+  coord_flip() +\par
+  scale_y_continuous(labels = percent_format()) +\par
+  scale_fill_manual(values = c("Normal/Mild" = "#2ca02c", "Moderate" = "#ff7f0e", "Severe" = "#d62728")) +\par
+  labs(\par
+    title = "Distribuci\'f3n del Nivel de Severidad por Condici\'f3n",\par
+    subtitle = "Proporci\'f3n de clasificaciones en las 25 evaluaciones",\par
+    x = "Condici\'f3n / Nivel Anat\'f3mico",\par
+    y = "Proporci\'f3n (%)",\par
+    fill = "Severidad"\par
+  ) +\par
+  theme_minimal(base_size = 11) +\par
+  theme(\par
+    legend.position = "top",\par
+    plot.title = element_text(face = "bold", size = 14),\par
+    axis.text.y = element_text(size = 8)\par
+  )\par
+\par
+print(p_barras)\par
+\par
+\par
+# ==============================================================================\par
+# B. MAPA DE CALOR (HEATMAP) DE CORRELACI\'d3N / CO-OCURRENCIA\par
+# ==============================================================================\par
+\par
+# Convertir severidad a puntuaci\'f3n num\'e9rica ordinal (0, 1, 2)\par
+df_numeric <- df_clean %>%\par
+  mutate(across(all_of(condition_cols), ~ as.numeric(factor(., levels = severity_levels)) - 1)) %>%\par
+  select(all_of(condition_cols))\par
+\par
+# Matriz de correlaci\'f3n de Spearman\par
+cor_matrix <- cor(df_numeric, method = "spearman")\par
+\par
+# Convertir la matriz en formato largo para ggplot\par
+melted_cor <- melt(cor_matrix)\par
+\par
+# Graficar Heatmap\par
+p_heatmap <- ggplot(melted_cor, aes(x = Var1, y = Var2, fill = value)) +\par
+  geom_tile(color = "white", linewidth = 0.3) +\par
+  scale_fill_viridis_c(option = "magma", direction = -1, limits = c(0, 1), name = "Rho Spearman") +\par
+  labs(\par
+    title = "Mapa de Calor de Co-ocurrencia y Correlaci\'f3n de Severidad",\par
+    subtitle = "Correlaci\'f3n de rangos de Spearman entre las 25 condiciones",\par
+    x = "", y = ""\par
+  ) +\par
+  theme_minimal(base_size = 10) +\par
+  theme(\par
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 7),\par
+    axis.text.y = element_text(size = 7),\par
+    plot.title = element_text(face = "bold", size = 14),\par
+    panel.grid = element_blank()\par
+  )\par
+\par
+print(p_heatmap)\par
+\par
+\par
+# ==============================================================================\par
+# C. MATRIZ DE FUERZA DE ASOCIACI\'d3N (V DE CRAM\'c9R & CHI-CUADRADO)\par
+# ==============================================================================\par
+\par
+cat("\\n--- CALCULANDO PRUEBAS DE ASOCIACI\'d3N DE CHI-CUADRADO Y V DE CRAM\'c9R ---\\n")\par
+\par
+# Funci\'f3n para calcular V de Cram\'e9r entre un par de variables\par
+cramer_v_matrix <- matrix(NA, nrow = length(condition_cols), ncol = length(condition_cols),\par
+                          dimnames = list(condition_cols, condition_cols))\par
+\par
+for(i in 1:length(condition_cols)) \{\par
+  for(j in 1:length(condition_cols)) \{\par
+    var1 <- df_clean[[condition_cols[i]]]\par
+    var2 <- df_clean[[condition_cols[j]]]\par
+    cramer_v_matrix[i, j] <- cramer_v(table(var1, var2))\par
+  \}\par
+\}\par
+\par
+# Top 10 pares de condiciones con mayor co-ocurrencia (excluyendo la diagonal)\par
+melted_cramer <- melt(cramer_v_matrix) %>%\par
+  filter(Var1 != Var2) %>%\par
+  distinct(val = pmin(as.character(Var1), as.character(Var2)), \par
+           val2 = pmax(as.character(Var1), as.character(Var2)), .keep_all = TRUE) %>%\par
+  arrange(desc(value)) %>%\par
+  head(10)\par
+\par
+cat("\\nTop 10 pares de condiciones con MAYOR fuerza de co-ocurrencia (V de Cram\'e9r):\\n")\par
+print(melted_cramer %>% select(Condicion_1 = Var1, Condicion_2 = Var2, Cramer_V = value))\par
+\'bfC\'f3mo interpretar las visualizaciones y resultados?\par
+El Gr\'e1fico de Barras Apiladas:\par
+\par
+Te permitir\'e1 identificar r\'e1pidamente cu\'e1l condici\'f3n es la m\'e1s com\'fanmente "afectada" con severidad Moderate o Severe.\par
+Lo habitual en estos conjuntos de datos es que los niveles inferiores (L4_L5 y L5_S1) tengan proporciones m\'e1s elevadas de severidad moderada o severa en comparaci\'f3n con los niveles superiores (L1_L2).\par
+El Mapa de Calor (Heatmap) de Spearman:\par
+\par
+Bloques o "Clusters" oscuros/brillantes: Busca agrupaciones cuadradas a lo largo de la diagonal.\par
+Simetr\'eda Bilateral: Observa la correlaci\'f3n entre el lado izquierdo y el derecho en el mismo nivel anat\'f3mico (p. ej., left_subarticular_stenosis_l4_l5 vs right_subarticular_stenosis_l4_l5). Generalmente muestran una co-ocurrencia muy fuerte.\par
+Continuidad Segmentaria: Revisa la correlaci\'f3n entre niveles contiguos (p. ej., L3_L4 con L4_L5).\par
+La Tabla de V de Cram\'e9r:\par
+\par
+Un valor cercano a 1.0 indica una dependencia casi perfecta entre las dos condiciones, mientras que valores cercanos a 0.0 indican independencia. Los 10 pares que te arroja esta tabla representan las relaciones de mayor fuerza estad\'edstica en tus datos.\par
+\'a1Prueba a correrlo y me comentas qu\'e9 patrones o hallazgos interesantes descubres en tus mapas!\par
+\par
+Ya he descargado el informe, ahora quiero saber que otras pruebas o m\'e9todos puedes recomendarme para aplicar, aparte de los que ya hemos aplicado\par
+\par
+\'a1Qu\'e9 alegr\'eda saber que el informe HTML te sirvi\'f3 y ya lo tienes descargado! \f2\u-10180?\u-8311?\f1\par
+\par
+Dado que tu conjunto de datos tiene una estructura muy rica (m\'faltiples mediciones categ\'f3ricas/ordinales tomadas en diferentes niveles para un mismo sujeto), existen metodolog\'edas avanzadas que nos permitir\'edan responder preguntas de investigaci\'f3n mucho m\'e1s profundas.\par
+\par
+Aqu\'ed te comparto mis recomendaciones bioestad\'edsticas organizadas por el objetivo anal\'edtico que desees alcanzar:\par
+\par
+1. M\'e9todos para Mediciones Repetidas y Datos Anidados (Multinivel)\par
+Como cada sujeto (study_id) tiene mediciones en 5 niveles lumbares distintos, las observaciones no son independientes entre s\'ed. Para modelar esto correctamente sin violar supuestos:\par
+\par
+Ecuaciones de Estimaci\'f3n Generalizadas (GEE - Generalized Estimating Equations):\par
+\'bfPara qu\'e9 sirve? Permite evaluar factores de riesgo o diferencias entre condiciones controlando la correlaci\'f3n dentro del mismo sujeto (intra-subject correlation). Es el est\'e1ndar de oro para datos ordinales repetidos.\par
+Paquete en R: geepack (funci\'f3n ordgee).\par
+Modelos Mixtos de Enlace Acumulativo (CLMM - Cumulative Link Mixed Models):\par
+\'bfPara qu\'e9 sirve? Si queremos predecir la severidad (Normal \par
+\f5\u8594?\f1\par
+\f5\u8594?\f3  \f1 Moderado \par
+\f5\u8594?\f1\par
+\f5\u8594?\f3  \f1 Severo) incluyendo el study_id como un efecto aleatorio (random intercept).\par
+Paquete en R: ordinal (funci\'f3n clmm).\par
+2. An\'e1lisis de Simetr\'eda y Concordancia Bilateral\par
+Teniendo condiciones medidas del lado izquierdo y derecho (por ejemplo, left_neural_foraminal_narrowing vs right_neural_foraminal_narrowing):\par
+\par
+Prueba de Simetr\'eda de Bowker / McNemar-Bowker:\par
+\'bfPara qu\'e9 sirve? La Chi-cuadrada nos dice si hay asociaci\'f3n, pero la prueba de Bowker nos dice si la severidad es sim\'e9trica o si hay un sesgo significativo hacia un lado particular (por ejemplo, si el lado izquierdo tiende a ser sistem\'e1ticamente m\'e1s severo que el derecho).\par
+Paquete en R: rstatix o stats (mcnemar.test).\par
+Kappa Ponderado de Cohen (Weighted Kappa):\par
+\'bfPara qu\'e9 sirve? Mide el grado de acuerdo/concordancia entre el lado izquierdo y derecho respetando el orden num\'e9rico de la severidad (no es lo mismo discrepar entre Normal y Moderado que entre Normal y Severo).\par
+Paquete en R: irr (kappa2).\par
+3. Reducci\'f3n de Dimensionalidad e \'cdndices de Severidad\par
+Tienes 25 variables relativas a la columna. Para no analizar variable por variable, podemos resumir la informaci\'f3n:\par
+\par
+An\'e1lisis de Correspondencias M\'faltiples (ACM / MCA):\par
+\'bfPara qu\'e9 sirve? Es el equivalente al An\'e1lisis de Componentes Principales (ACP), pero dise\'f1ado exclusivamente para variables categ\'f3ricas. Nos ayuda a visualizar en un mapa 2D c\'f3mo se agrupan las severidades y los niveles lumbares.\par
+Paquete en R: FactoMineR y factoextra.\par
+Construcci\'f3n de un \'cdndice Global de Carga Lumbar (Score Ordinal Latente):\par
+\'bfPara qu\'e9 sirve? Mediante An\'e1lisis Factorial Ordinal, podemos condensar las 25 variables en 1 o 2 puntuaciones continuas por paciente (ej. \'cdndice de Estenosis Canalicular e \'cdndice Foraminal).\par
+4. Segmentaci\'f3n y Tipificaci\'f3n de Patrones (Clustering Categ\'f3rico)\par
+An\'e1lisis de Clases Latentes (LCA - Latent Class Analysis):\par
+\'bfPara qu\'e9 sirve? Permite agrupar a los sujetos/estudios en subgrupos o fenotipos estad\'edsticos impl\'edcitos seg\'fan su patr\'f3n global de severidad. Por ejemplo:\par
+Clase 1: Sujetos con afectaci\'f3n aislada L4-S1.\par
+Clase 2: Sujetos con afectaci\'f3n multinivel difusa.\par
+Clase 3: Sujetos predominantemente sanos/leves.\par
+Paquete en R: poLCA.\par
+5. Modelado Predictivo y Aprendizaje Autom\'e1tico\par
+Bosques Aleatorios Ordinales (Ordinal Random Forest):\par
+\'bfPara qu\'e9 sirve? Si quisieras predecir la severidad en un nivel cr\'edtico (ej. L5/S1) a partir de los niveles superiores, este algoritmo maneja la naturaleza ordinal de los datos y mide la importancia relativa de cada variable (Variable Importance).\par
+Paquete en R: ordinalForest.\par
+\f2\u-10179?\u-9055?\f3  \f1\'bfQu\'e9 paso te gustar\'eda dar ahora?\par
+Cualquiera de estos m\'e9todos le dar\'e1 un nivel acad\'e9mico e investigativo alt\'edsimo a tu estudio. Si hay alguno en particular que te llame la atenci\'f3n (por ejemplo, el An\'e1lisis de Correspondencias M\'faltiples (MCA) para ver mapas 2D visuales, o el An\'e1lisis de Simetr\'eda Izquierda vs. Derecha), dime y te preparo el c\'f3digo R listo para ejecutar. \'a1Estoy a tu disposici\'f3n!\lang10\par
+}
+ 
