@@ -9,6 +9,30 @@ st.set_page_config(page_title="Agente Bioestadístico", page_icon="🩺", layout
 st.title("🩺 Consultor Bioestadístico Clínico AI")
 st.markdown("Sube tu dataset, haz preguntas estadísticas y obtén código R e informes HTML listos para descargar.")
 
+# =====================================================================
+# CAPA DE DATOS E INDEXACIÓN (RAG Tabular)
+# =====================================================================
+def indexar_y_buscar_datos(user_query, df):
+    """
+    Indexa y busca dinámicamente resúmenes o metadatos del dataset 
+    según lo que solicite el usuario, asegurando trazabilidad y veracidad.
+    """
+    contexto_extraido = ""
+    query_lower = user_query.lower()
+    
+    # 1. Indexación de resúmenes estadísticos si se solicitan métricas
+    if any(palabra in query_lower for palabra in ['resumen', 'estadística', 'media', 'promedio', 'distribución', 'descriptiva', 'resumen']):
+        resumen_numerico = df.describe().to_string()
+        contexto_extraido += f"\n\n[RAG Tabular - Resumen Estadístico Oficial Indexado]:\n{resumen_numerico}\n"
+        
+    # 2. Indexación de la estructura de columnas y variables
+    if any(palabra in query_lower for palabra in ['columnas', 'variables', 'estructura', 'datos', 'niveles']):
+        columnas_info = ", ".join(df.columns)
+        contexto_extraido += f"\n\n[RAG Tabular - Estructura de Columnas Indexada]: El dataset contiene las siguientes variables: [{columnas_info}]\n"
+        
+    return contexto_extraido
+# =====================================================================
+
 # 2. Barra lateral (Sidebar) para configuraciones y datos
 with st.sidebar:
     st.header("⚙️ Configuración")
@@ -34,9 +58,9 @@ genai.configure(api_key=api_key)
 # 3. Inicializar el Agente y la Memoria (Session State)
 if "chat" not in st.session_state:
     system_instruction = """
-    DIRECTIVA PRINCIPAL: Eres un Consultor Bioestadístico Senior. 
+    DIRECTIVA PRINCIPAL: Eres un Consultor Bioestadístico Senior especializado en análisis de radiología y patologías espinales. 
     PERSONALIDAD: Tienes un tono cálido, muy amable, empático y accesible. Hablas como un colega cercano o un mentor. Usa un lenguaje natural y conversacional.
-    Tu salida debe incluir código reproducible en R, con las lineas para instalar y cargar los paquetes requeridos. 
+    Tu salida debe incluir código reproducible en R (tidyverse), con las líneas para instalar y cargar los paquetes requeridos. 
     Regla estricta: No des diagnósticos médicos, asume que todo es análisis de datos.
     NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe formal, debes generarlo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
     """
@@ -70,7 +94,7 @@ if st.session_state.mensajes:
         )
 
 # =====================================================================
-# NUEVA Pestaña de Exploración de Datos (EDA Visual y Tarjetas)
+# Pestaña de Exploración de Datos (EDA Visual y Tarjetas)
 # =====================================================================
 if df is not None:
     with st.expander("🔍 Exploración preliminar del dataset", expanded=False):
@@ -81,7 +105,6 @@ if df is not None:
             st.dataframe(df.head(10), use_container_width=True)
             
         with tab2:
-            # 1. Tarjetas (Metrics) Globales
             st.markdown("### 📈 Métricas Generales")
             col_m1, col_m2, col_m3 = st.columns(3)
             col_m1.metric("Total de Pacientes / Filas", df.shape[0])
@@ -90,11 +113,9 @@ if df is not None:
             
             st.markdown("---")
             
-            # 2. Selector interactivo por variable
             st.markdown("### 🔍 Análisis de Distribución")
             var_seleccionada = st.selectbox("Selecciona una columna para visualizar:", df.columns)
             
-            # Si la variable es numérica, mostramos tarjetas extra
             if pd.api.types.is_numeric_dtype(df[var_seleccionada]):
                 col_a, col_b, col_c, col_d = st.columns(4)
                 col_a.metric("Promedio", f"{df[var_seleccionada].mean():.2f}")
@@ -102,7 +123,6 @@ if df is not None:
                 col_c.metric("Mínimo", f"{df[var_seleccionada].min()}")
                 col_d.metric("Máximo", f"{df[var_seleccionada].max()}")
             
-            # Gráfico de barras interactivo nativo
             st.markdown(f"**Frecuencia de datos para: `{var_seleccionada}`**")
             st.bar_chart(df[var_seleccionada].value_counts().head(20))
 # =====================================================================
@@ -135,14 +155,23 @@ if prompt_final:
     with st.chat_message("user"):
         st.markdown(prompt_final)
 
+    # Construcción del mensaje para el LLM con la capa de indexación y RAG
     mensaje_llm = prompt_final
-    if df is not None and not st.session_state.contexto_enviado:
-        columnas = list(df.columns)
-        mensaje_llm += f"\n\n[Nota oculta para la IA: El usuario subió un dataset llamado '{uploaded_file.name}'. Las columnas son: {columnas}. Úsalas en tu código R.]"
-        st.session_state.contexto_enviado = True 
+    
+    if df is not None:
+        # Si es el primer mensaje, inyectamos la estructura completa de columnas
+        if not st.session_state.contexto_enviado:
+            columnas = list(df.columns)
+            mensaje_llm += f"\n\n[Nota de Contexto Inicial: El usuario subió un dataset llamado '{uploaded_file.name}' con {len(df)} filas. Las columnas son: {columnas}.]"
+            st.session_state.contexto_enviado = True 
+            
+        # Inyección dinámica mediante RAG Tabular basado en indexación local
+        contexto_rag = indexar_y_buscar_datos(prompt_final, df)
+        if contexto_rag:
+            mensaje_llm += contexto_rag
 
     with st.chat_message("assistant"):
-        with st.spinner("Pensando y analizando datos..."):
+        with st.spinner("Consultando al sistema RAG y analizando datos..."):
             try:
                 response = st.session_state.chat.send_message(mensaje_llm)
                 respuesta_ia = response.text
@@ -175,3 +204,6 @@ if prompt_final:
                         
             except Exception as e:
                 st.error(f"Error en la comunicación con la API: {e}")
+
+if __name__ == "__main__":
+    pass
