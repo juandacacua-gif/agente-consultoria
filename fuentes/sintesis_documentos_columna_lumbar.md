@@ -1,10 +1,10 @@
-# Síntesis Bibliográfica de Fuentes de Referencia: Patología Degenerativa Lumbar e Inteligencia Artificial
+# Síntesis Bibliográfica de Fuentes de Referencia
 
-Este documento reúne el análisis detallado y estructurado de los **10 archivos académicos** subidos a la libreta, incluyendo sus identificadores DOI (o estado de disponibilidad en el texto), objetivos, metodologías, hallazgos clave y citas sugeridas.
+Análisis detallado y estructurado de los **10 archivos académicos** usados como fuentes para el proyecto incluyendo sus identificadores DOI, objetivos, metodologías, hallazgos clave y citas sugeridas.
 
 ---
 
-## Tabla Resumen de Fuentes
+## Tabla: Resumen de Fuentes
 
 | N° / Archivo | Título Corto / Enfoque | Autores / Año | DOI / Identificador |
 | :--- | :--- | :--- | :--- |
