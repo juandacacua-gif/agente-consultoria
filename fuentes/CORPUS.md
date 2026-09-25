@@ -1,6 +1,6 @@
 # Síntesis Bibliográfica de Fuentes de Referencia
 
-Análisis detallado y estructurado de los **10 archivos académicos** usados como fuentes para el proyecto incluyendo sus identificadores DOI, objetivos, metodologías, hallazgos clave y citas sugeridas.
+Análisis detallado y estructurado de los **10 archivos académicos** usados como fuentes y corpus para el proyecto incluyendo sus identificadores DOI, objetivos, metodologías, hallazgos clave y citas sugeridas.
 
 ---
 
