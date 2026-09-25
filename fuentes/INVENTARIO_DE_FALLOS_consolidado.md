@@ -13,20 +13,17 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué generó:** Un código para análisis descriptivo de los datos
 
-**Qué estaba mal:** Una función inexistente de R (`tidy`)
+**Qué estaba mal:** Una función equivocada de R (`tidy`) que además no cargaba, porque 
+el paquete `broom`, al que pertenece la función, no estaba cargado.
 
-**Cómo lo detecté:** Cuando corría el código y nada corregía el error
+**Cómo lo detecté:** Cuando corría el código y nada corregía el error, la funcion `tidy`
+es una función hecha para extraer los coeficientes y parámetros de un modelo estadístico,
+pero el codigo generado por IA lo pretendía usar como parte del proceso para hacer unos
+gráficos.
 
-**Qué me costó:** Tiempo y ajuste manual
+**Qué me costó:** Tiempo y ajuste manual, además de tener que consultar nuevamente al agente.
 
 **Qué lo habría evitado:** Preparar mejor el agente y darle más contexto
-
-> **Nota pendiente de revisar antes de la sustentación:** `tidy()` sí es una función
-> real de R, del paquete `broom` (parte del tidyverse). Vale la pena confirmar si el
-> error real fue usarla sin cargar `library(broom)` primero (lo que sí da un error de
-> "función no encontrada" aunque la función exista), o si fue otra función con nombre
-> parecido la que en realidad no existía. Ajustar la descripción según lo que diga el
-> mensaje de error real de R, para que el fallo quede bien caracterizado.
 
 ### Fallo 2
 
