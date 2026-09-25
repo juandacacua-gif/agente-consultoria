@@ -69,7 +69,7 @@ Análisis detallado y estructurado de los **10 archivos académicos** usados com
 * **Título original:** *Biomechanical Effect of L4–L5 Intervertebral Disc Degeneration on the Lower Lumbar Spine: A Finite Element Study*.
 * **Autores:** Xin-yi Cai, Meng-si Sun, Yun-peng Huang, Zi-xuan Liu, Chun-jie Liu, Cheng-fei Du y Qiang Yang.
 * **Publicación:** *Orthopaedic Surgery* (2020).
-* **DOI:** [10.1111/os.12703](DOI: 10.1111/os.12703).
+* **DOI:** [10.1111/os.12703](https://doi.org/10.1111/os.12703).
 * **Objetivo:** Evaluar mediante simulación computacional de elementos finitos los efectos biomecánicos de la degeneración en L4–L5 sobre la columna lumbar inferior.
 * **Metodología:** Modelo 3D no lineal de elementos finitos L3–S1. Simulación de degeneración discal leve, moderada y severa en L4–L5 bajo compresión (500 N) y momentos de flexión/extensión/rotación.
 * **Resultados clave:** La degeneración en L4–L5 redujo su rango de movimiento (ROM) e presión intradiscal (IDP). Los niveles adyacentes (L3–L4 y L5–S1) experimentaron un aumento compensatorio marcado en ROM (1,88° a 8,19°) y carga en articulaciones facetarias.
