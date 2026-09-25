@@ -11,7 +11,7 @@ Análisis detallado y estructurado de los **10 archivos académicos** usados com
 | **1. 073c3e60427a...** | Graduación simplificada en RM lumbar | Miskin et al. (2021) | [10.1093/pm/pnab098](https://doi.org/10.1093/pm/pnab098) |
 | **2. A_Comprehensive...** | Revisión integral de IA en RM lumbar | Abdelrahman et al. (2026) | [10.66279/r8h6j935](https://doi.org/10.66279/r8h6j935) |
 | **3. Anatomy-guided...** | Aprendizaje profundo guiado por anatomía | Chai et al. (2026) | [10.3389/fmed.2026.1848548](https://doi.org/10.3389/fmed.2026.1848548) |
-| **4. OS-12-917.pdf** | Efecto biomecánico en elementos finitos (L4-L5) | Cai et al. (2020) | [10.1111/os.12703](DOI: 10.1111/os.12703) |
+| **4. OS-12-917.pdf** | Efecto biomecánico en elementos finitos (L4-L5) | Cai et al. (2020) | [10.1111/os.12703](https://doi.org/10.1111/os.12703) |
 | **5. The_RSNA_Lumbar...** | Dataset RSNA LumbarDISC | Richards et al. / RSNA (2026) | [10.1148/ryai.250480](https://doi.org/10.1148/ryai.250480) |
 | **6. al-tameemi_2017...** | Mielografía por RM y acuerdo inter-observador | Al-Tameemi et al. (2017) | [10.4184/asj.2017.11.2.198](https://doi.org/10.4184/asj.2017.11.2.198) |
 | **7. bagley_2019.pdf** | Conceptos y manejo de estenosis lumbar | Bagley et al. (2019) | [10.12688/f1000research.16082.1](https://doi.org/10.12688/f1000research.16082.1) |
