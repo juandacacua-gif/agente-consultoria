@@ -13,17 +13,20 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué generó:** Un código para análisis descriptivo de los datos
 
-**Qué estaba mal:** Una función equivocada de R (`tidy`) que además no cargaba, porque 
-el paquete `broom`, al que pertenece la función, no estaba cargado.
+**Qué estaba mal:** Una función inexistente de R (`tidy`)
 
-**Cómo lo detecté:** Cuando corría el código y nada corregía el error, la funcion `tidy`
-es una función hecha para extraer los coeficientes y parámetros de un modelo estadístico,
-pero el codigo generado por IA lo pretendía usar como parte del proceso para hacer unos
-gráficos.
+**Cómo lo detecté:** Cuando corría el código y nada corregía el error
 
-**Qué me costó:** Tiempo y ajuste manual, además de tener que consultar nuevamente al agente.
+**Qué me costó:** Tiempo y ajuste manual
 
 **Qué lo habría evitado:** Preparar mejor el agente y darle más contexto
+
+> **Nota pendiente de revisar antes de la sustentación:** `tidy()` sí es una función
+> real de R, del paquete `broom` (parte del tidyverse). Vale la pena confirmar si el
+> error real fue usarla sin cargar `library(broom)` primero (lo que sí da un error de
+> "función no encontrada" aunque la función exista), o si fue otra función con nombre
+> parecido la que en realidad no existía. Ajustar la descripción según lo que diga el
+> mensaje de error real de R, para que el fallo quede bien caracterizado.
 
 ### Fallo 2
 
@@ -73,31 +76,38 @@ gráficos.
 
 ### Fallo 2
 
-**Herramienta:** Claude (búsqueda web dirigida para localizar la referencia)
+**Herramienta:** Claude (búsqueda web dirigida, y verificación posterior contra el PDF real subido por Juan David)
 
-**Qué generó:** Al intentar localizar la referencia "Chai, Z., Liu, C., Qin, R., Zhao, D., Shi, A. (2026). Anatomy-guided context-aware deep learning for lumbar degenerative disease grading and burden-aware risk assessment on MRI. Frontiers in Medicine", citada en la diapositiva 9 de nuestro anteproyecto, hicimos tres búsquedas con términos distintos.
+**Qué generó:** Al buscar la referencia "Xin Yi, C., et al. (2020). Biomechanical Effect of L4–L5 Intervertebral Disc Degeneration on the Lower Lumbar Spine." citada en la bibliografía del anteproyecto, y compararla luego contra el PDF real, encontramos que el nombre del primer autor está invertido.
 
-**Qué estaba mal:** No encontramos ese artículo con ese título, esos autores ni en esa revista en ningún lugar. Frontiers in Medicine es de acceso abierto por defecto, así que si existiera debería aparecer fácilmente indexado, como sí pasó con otras dos referencias que buscamos de la misma manera (Al-Tameemi et al. y Bagley et al., ambas confirmadas sin problema). Todo apunta a que es una referencia inventada que se coló en algún punto de la elaboración del anteproyecto original, con apariencia perfectamente creíble (nombres de autores plausibles, título coherente con el tema, revista real).
+**Qué estaba mal:** El primer autor real es **Cai, Xin-yi** (apellido Cai, nombre de pila Xin-yi, en orden de nombre chino), no "Xin Yi, C." como aparece en la bibliografía — quedó tratado como si "Xin Yi" fuera el apellido y "C." la inicial del nombre. Es el mismo patrón que encontramos en otras dos referencias de la misma bibliografía: Walsh et al. (2026), donde el segundo autor "Lee, Un Jung" (nombre coreano) quedó fusionado con el apellido de Walsh; y la referencia de "Beyond Accuracy", donde los autores reales quedaron omitidos por completo y se citó "Preprints." como si fuera el autor. En total, **tres de las diez referencias de la bibliografía tienen el mismo tipo de error: nombres de autores no occidentales mal formateados o incompletos** — no parece un error aislado, sino un patrón sistemático en cómo se armó la bibliografía original.
 
-**Cómo lo detecté:** Verificando cada referencia contra una fuente externa real (Frontiers, PubMed, DOAJ), en vez de asumir que estaba bien solo porque figuraba en la bibliografía con formato correcto.
+**Cómo lo detecté:** Comparando el nombre del autor tal como aparece en la bibliografía del anteproyecto contra el nombre real que figura en el PDF del artículo (una vez Juan David lo confirmó con el DOI real, `10.1111/os.12703`).
 
-**Qué me costó:** Tiempo de búsqueda repetida sin resultado, y la incertidumbre de no poder confirmar al 100% que no existe (solo puedo decir que no la encontré, no que sea imposible que exista).
+**Qué me costó:** Poco tiempo una vez tuvimos el PDF real — el problema fue más de tiempo acumulado entre los tres casos, y la necesidad de revisar cada nombre de autor letra por letra en vez de asumir que la bibliografía ya estaba bien transcrita.
 
-**Qué lo habría evitado:** Exigir un enlace o DOI verificable para cada referencia en el momento de escribir el anteproyecto original, no después.
+**Qué lo habría evitado:** Copiar los nombres de autores directamente desde la página oficial del artículo (o desde un gestor de referencias como Zotero, que los importa automáticamente desde el DOI) en vez de escribirlos a mano o dejar que una herramienta de IA los reconstruyera sin verificación.
+
+> **Nota:** este fallo reemplaza el que teníamos antes sobre "Chai et al. no localizable" — esa referencia sí existe (Juan David encontró el PDF real, DOI `10.3389/fmed.2026.1848548`), así que ya no aplica como fallo. La búsqueda que no la encontró fue una limitación de mi herramienta de búsqueda, no evidencia de que la referencia fuera inventada — una distinción importante que también vale la pena mencionar en la sustentación como lección aprendida.
 
 ### Fallo 3
 
-**Herramienta:** Claude (lectura y cotejo de PDF completos contra las diapositivas)
+**Herramienta:** NotebookLM (con nuestro corpus de 6 PDF cargados: LumbarDISC, Xin Yi/Cai, Trento, Beyond Accuracy, Al-Tameemi, Bagley)
 
-**Qué generó:** Al leer el cuerpo completo del preprint "Beyond Accuracy: Multi-Level Ordinal Assessment of Lumbar Spine Degeneration..." (citado en la diapositiva 7) y compararlo con lo que dice esa diapositiva, encontramos dos problemas en la misma referencia.
+**Qué generó:** Al pedirle a NotebookLM que respondiera *solo* con base en esos 6 documentos sobre el acuerdo entre lectores en la gradación de estenosis lumbar, dio una respuesta detallada que incluía valores exactos de kappa (0.702 para estenosis del canal, 0.544 para estenosis foraminal, 0.557 para artropatía facetaria, 0.323 para receso lateral) atribuidos a "un sistema de gradación simplificado... expertos en columna no radiólogos", con un número de cita `[5]` como si viniera de las fuentes cargadas.
 
-**Qué estaba mal:** Primero, la bibliografía del anteproyecto cita el autor como "Preprints." —el nombre de la plataforma donde se publicó, no de una persona— cuando los autores reales son Trînc, E.C., Ancuți, C., Ancuți, C. e Iacob, E.R. Segundo, la diapositiva describe el paper como si propusiera "modelos estadísticos" para atender "el enorme desbalance de datos", pero el artículo real usa cinco pipelines de Vision Transformers (un método de deep learning) y explica la insuficiencia de la exactitud convencional por la complejidad de evaluar múltiples condiciones y niveles a la vez, no por desbalance de clases.
+**Qué estaba mal:** Ninguno de los 6 PDF que le dimos contenía esos valores ni la palabra "Miskin". Confirmamos línea por línea contra el texto completo de los 6 documentos: no aparecían en ninguno. Los valores sí son reales — pertenecen al artículo de Miskin et al. (2021), *Pain Medicine*, DOI `10.1093/pm/pnab098` — pero mi compañero confirmó que **subió ese PDF al notebook un día después** de que hiciéramos esta prueba, junto con otras fuentes. Es decir, NotebookLM citó contenido que no estaba disponible en el momento de la consulta, a pesar de la instrucción explícita de responder solo con lo que se le había subido.
 
-**Cómo lo detecté:** Leyendo el PDF completo (no solo el resumen) y comparando frase por frase contra lo que dice nuestra diapositiva, en vez de confiar en que el resumen de la diapositiva era fiel al artículo solo porque la referencia bibliográfica apuntaba a un documento real.
+**Cómo lo detecté:** Extrayendo el texto completo de los 6 PDF originales con `pdftotext` y buscando los valores numéricos exactos y el nombre "Miskin" en todos ellos — no bastaba con confiar en que el número de cita `[5]` de la interfaz apuntara a algo real, había que comprobarlo contra el contenido real de cada archivo.
 
-**Qué me costó:** Tener que releer el paper completo para ubicar la sección exacta que contradice la caracterización de la diapositiva, y ahora corregir tanto el nombre de los autores en la bibliografía como la descripción del método en el estado del arte.
+**Qué me costó:** Tiempo de extracción y búsqueda en los 6 PDF, y la coordinación con mi compañero para confirmar la fecha exacta en que subió el PDF de Miskin (sin esa confirmación, no podíamos estar seguros de si el fallo era del sistema o simplemente un documento que se nos había olvidado que sí estaba ahí).
 
-**Qué lo habría evitado:** No conformarme con que la referencia "existiera" — verificar también que el contenido descrito en la diapositiva correspondiera de verdad a lo que dice el documento citado, sección por sección.
+**Qué lo habría evitado:** Llevar un registro exacto de qué documentos estaban cargados en el notebook en el momento preciso de cada prueba del experimento, en vez de asumir que "el corpus" es siempre el mismo conjunto de archivos a lo largo del tiempo.
+
+> Este es, de los tres, el fallo más útil para la sustentación: tiene fecha exacta,
+> confirmación cruzada de dos personas, y un mecanismo claro (herramienta de contexto
+> cerrado que igual mezcla conocimiento externo cuando el tema es muy conocido). Lo
+> proponemos como el **caso de fallo oficial** para el entregable de la semana 3.
 
 ---
 
@@ -108,10 +118,17 @@ gráficos.
 | 1 | Función de R mal caracterizada (`tidy`) — *descripción pendiente de ajustar* | Juan David | Código / herramienta |
 | 2 | Regresión politómica en vez de ordinal | Juan David | Conceptual / estadístico |
 | 3 | Orden de factores en gráfico | Juan David | Código, menor |
-| 4 | Trento citado como Abdelrahman | Camilo | Cita bibliográfica — fuente equivocada |
-| 5 | Chai et al. no localizable | Camilo | Cita bibliográfica — fuente inexistente |
-| 6 | Beyond Accuracy: autor real omitido + método mal descrito | Camilo | Cita bibliográfica + contenido |
+| 4 | Trento citado bajo la cita de Abdelrahman (PDF equivocado en el repo) | Camilo | Cita bibliográfica — archivo mal vinculado |
+| 5 | Tres referencias con nombres de autores no occidentales mal formateados (Walsh/Lee, Beyond Accuracy, Xin Yi/Cai) | Camilo | Patrón sistemático de formato de cita |
+| 6 | **NotebookLM citó a Miskin et al. sin que ese PDF estuviera en el corpus subido en el momento de la consulta** | Camilo | **Fallo del sistema de contexto cerrado — caso oficial para semana 3** |
 
 Seis fallos documentados entre los dos, con variedad de tipos (código, estadístico,
-bibliográfico y de fidelidad de contenido) — más que suficiente frente al mínimo de
-tres por persona que pide la actividad.
+bibliográfico, patrón sistemático, y fallo del propio sistema de contexto cerrado) —
+más que suficiente frente al mínimo de tres por persona que pide la actividad.
+
+**Nota de corrección:** una versión anterior de este inventario incluía "Chai et al.
+no localizable" como fallo. Se retiró porque Juan David encontró el artículo real
+(DOI `10.3389/fmed.2026.1848548`) — no era una referencia inventada, sino una
+limitación de las búsquedas que hicimos en su momento. Queda como ejemplo, en el
+propio proceso de armar este inventario, de por qué "no encontrar algo" no es lo
+mismo que "confirmar que no existe".
