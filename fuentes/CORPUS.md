@@ -15,7 +15,7 @@ Análisis detallado y estructurado de los **10 archivos académicos** usados com
 | **5. The_RSNA_Lumbar...** | Dataset RSNA LumbarDISC | Richards et al. / RSNA (2026) | [10.1148/ryai.250480](https://doi.org/10.1148/ryai.250480) |
 | **6. al-tameemi_2017...** | Mielografía por RM y acuerdo inter-observador | Al-Tameemi et al. (2017) | [10.4184/asj.2017.11.2.198](https://doi.org/10.4184/asj.2017.11.2.198) |
 | **7. bagley_2019.pdf** | Conceptos y manejo de estenosis lumbar | Bagley et al. (2019) | [10.12688/f1000research.16082.1](https://doi.org/10.12688/f1000research.16082.1) |
-| **8. bc040e9a-2071...** | Copia idéntica de Bagley et al. (2019) | Bagley et al. (2019) | [10.12688/f1000research.16082.1](https://doi.org/10.12688/f1000research.16082.1) |
+| **8. s00586-025-09179-z.pdf** | Avances y desafíos en la Resonancia asistida por IA | Zhao et al. (2025) | [10.1007/s00586-025-09179-z](https://doi.org/10.1007/s00586-025-09179-z) |
 | **9. beyond_accuracy...** | Vision Transformers y métricas ordinales | Trînc et al. (2026) | [10.20944/preprints202608.1250.v1](https://doi.org/10.20944/preprints202608.1250.v1) |
 | **10. medicina-61...** | IA en patología degenerativa lumbar (Review) | Trento et al. (2025) | [10.3390/medicina61081400](https://doi.org/10.3390/medicina61081400) |
 
@@ -119,12 +119,16 @@ Análisis detallado y estructurado de los **10 archivos académicos** usados com
 
 ---
 
-### 8. `bc040e9a-2071-43bc-aa89-4d353d3b1955_16082_-_carlos_bagley.pdf`
-* **Título original:** *Current concepts and recent advances in understanding and managing lumbar spine stenosis* (Copia duplicada).
-* **Autores:** Carlos Bagley, Matthew MacAllister, Luke Dosselman, Jessica Moreno, Salah G. Aoun y Tarek Y. El Ahmadieh.
-* **Publicación:** *F1000Research* (2019).
-* **DOI:** [10.12688/f1000research.16082.1](https://doi.org/10.12688/f1000research.16082.1).
-* **Observación:** Archivo duplicado del documento #7. Mantiene las mismas conclusiones clínicas sobre LSS.
+### 8. `s00586-025-09179-z.pdf`
+* **Título original:** *Advances and challenges in AI-assisted MRI for lumbar disc degeneration detection and classification*.
+* **Autores:** Peng Zhao, Shan Zhu.
+* **Publicación:** *European Spine Journal* (2026).
+* **DOI:** [10.1007/s00586-025-09179-z](https://doi.org/10.1007/s00586-025-09179-z).
+* **Objetivo:**  Proporcionar una visión general sobre las aplicaciones de Inteligencia Artificial (aprendizaje automático y aprendizaje profundo) para la detección y clasificación automatizada de la degeneración del disco intervertebral mediante resonancia magnética.
+* **Metodología:** Revisión estructurada a partir de una búsqueda sistemática realizada por dos radiólogos en las bases de datos PubMed, Embase y Web of Science. Se evaluaron y sintetizaron 17 estudios representativos (publicados entre 2014 y 2024), desde clasificadores tradicionales (SVM, Random Forest) hasta redes neuronales convolucionales (CNN, SpineNet, ResNet, U-Net) y modelos híbridos combinados con Transformers.
+* **Resultados clave:** Los sistemas de IA alcanzaron una alta precisión y reproducibilidad en la graduación automatizada de IDD bajo la escala Pfirrmann.
+* **Conclusión:** La IA aplicada a la RM lumbar posee un gran potencial para mejorar la eficiencia y eliminar la subjetividad en el diagnóstico de la degeneración discal, sin embargo su implementación clínica real exige superar retos en cuanto a la generalizabilidad entre distintos centros, la heterogeneidad de los datos, la interpretabilidad de los modelos y la realización de validaciones prospectivas a gran escala.
+* **Cita recomendada:** Zhao, P., & Zhu, S. (2026). Advances and challenges in AI-assisted MRI for lumbar disc degeneration detection and classification. European Spine Journal, 35(3), 1291–1300 , doi:10.1007/s00586-025-09179-z.
 
 ---
 
