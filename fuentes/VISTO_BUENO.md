@@ -32,7 +32,7 @@ principalmente por su capacidad de citar con localización exacta dentro del doc
 
 ## 3. Corpus
 
-9 documentos verificados con procedencia documentada (`fuentes/PROCEDENCIA.md`):
+10 documentos verificados con procedencia documentada (`fuentes/PROCEDENCIA.md`):
 Richards et al. (LumbarDISC), Cai/Xin Yi et al. (biomecánica L4-L5), Trento et al.,
 Beyond Accuracy (preprint), Al-Tameemi et al., Bagley et al., Miskin et al., Abdelrahman
 et al., y Chai et al. Todos de acceso abierto salvo dos referencias descartadas o
