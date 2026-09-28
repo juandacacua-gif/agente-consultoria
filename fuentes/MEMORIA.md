@@ -9,7 +9,7 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 ### Fallo 1
 
-**Herramienta:** Gemini
+**Herramienta:** Gemini 3.6 Flash
 
 **Qué generó:** Un código para análisis descriptivo de los datos
 
@@ -23,7 +23,7 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 ### Fallo 2
 
-**Herramienta:** Gemini
+**Herramienta:** Gemini 3.6 Flash
 
 **Qué generó:** Un código para imputar los datos faltantes
 
@@ -37,7 +37,7 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 ### Fallo 3
 
-**Herramienta:** Gemini
+**Herramienta:** Gemini 3.6 Flash
 
 **Qué generó:** Un código para análisis exploratorio de los datos con generación de gráficos incluidos
 
