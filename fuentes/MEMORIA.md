@@ -13,20 +13,13 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué generó:** Un código para análisis descriptivo de los datos
 
-**Qué estaba mal:** Una función inexistente de R (`tidy`)
+**Qué estaba mal:** Una función mal usada de R (`tidy`)
 
 **Cómo lo detecté:** Cuando corría el código y nada corregía el error
 
 **Qué me costó:** Tiempo y ajuste manual
 
 **Qué lo habría evitado:** Preparar mejor el agente y darle más contexto
-
-> **Nota pendiente de revisar antes de la sustentación:** `tidy()` sí es una función
-> real de R, del paquete `broom` (parte del tidyverse). Vale la pena confirmar si el
-> error real fue usarla sin cargar `library(broom)` primero (lo que sí da un error de
-> "función no encontrada" aunque la función exista), o si fue otra función con nombre
-> parecido la que en realidad no existía. Ajustar la descripción según lo que diga el
-> mensaje de error real de R, para que el fallo quede bien caracterizado.
 
 ### Fallo 2
 
