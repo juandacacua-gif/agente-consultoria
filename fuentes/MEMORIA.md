@@ -451,8 +451,6 @@ Ante una consulta cuya respuesta **no se encuentre explícitamente** en los docu
 ## 6. Historial de Cambios
 * **v1.0 (Versión inicial):** Directrices sobre restricción de fuentes y obligatoriedad de abstención ante vacíos informativos.
 
-![Proporción utilizable por tratamiento](agente-consultoria/fuentes/experimento/proporcion_utilizable_por_tratamiento.png)
-
 # 4. Tabla de trazabilidad
 
 Cubre las diapositivas 7, 8 y 9 del anteproyecto (sección "Estado del arte"). Por cada
