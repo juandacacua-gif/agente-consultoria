@@ -112,7 +112,8 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 Seis fallos documentados entre los dos, con variedad de tipos (código, estadístico,
 bibliográfico, patrón sistemático, y fallo del propio sistema de contexto cerrado) —
-más que suficiente frente al mínimo de tres por persona que pide la actividad.
+más que suficiente frente al mínimo de tres por persona que pide la actividad. Esta
+experiencia también deja una lección metodológica aplicada en más de un punto del
 propio proceso de armar este inventario, de por qué "no encontrar algo" no es lo
 mismo que "confirmar que no existe".
 
@@ -120,7 +121,9 @@ mismo que "confirmar que no existe".
 
 18 preguntas con respuesta conocida, localizada en documento + página del corpus. Las
 últimas 4 están **deliberadamente fuera del corpus** para probar si el sistema se
-abstiene correctamente o inventa una respuesta.
+abstiene correctamente o inventa una respuesta. Las 18 ya fueron corridas contra el
+sistema final (NotebookLM, corpus de 10 documentos, protocolo de prompts v1.0
+aplicado) — ver el detalle completo en `RESULTADOS_banco_preguntas.md`.
 
 Formato: pregunta → respuesta esperada → documento y ubicación exacta → cómo se verificó.
 
@@ -133,72 +136,84 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 **Respuesta esperada:** 2,697 pacientes, 8,593 series de imágenes, 8 instituciones, 6 países, 5 continentes.
 **Fuente:** Richards et al. — *The RSNA LumbarDISC Dataset*.
 **Verificado:** sí, exacto, confirmado por búsqueda directa al artículo.
+**Resultado en la prueba (semana 3):** ✅ Utilizable — respuesta exacta.
 
 ### 2. Escala de severidad usada en LumbarDISC
 **Pregunta:** ¿Cómo se construyó la escala de severidad de 3 niveles del dataset, y por qué se redujo de 4 a 3?
 **Respuesta esperada:** Se combinaron los grados "Normal" y "Leve" en una sola categoría para aumentar el consenso entre anotadores; quedó en Normal/Leve, Moderada, Severa.
 **Fuente:** `The_RSNA_Lumbar_Degenerative_Imaging_Spine_Classif.pdf`, línea 175 y 528-529 del texto extraído.
 **Verificado:** sí, confirmado con `pdftotext` sobre el PDF real.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 3. Institución colombiana en el dataset
 **Pregunta:** ¿Qué institución colombiana participó como anotadora en el dataset LumbarDISC, y quién fue la especialista?
 **Respuesta esperada:** Fundación Santa Fe de Bogotá; la especialista es la Dra. Angela Guarnizo Capera.
 **Fuente:** `The_RSNA_Lumbar_Degenerative_Imaging_Spine_Classif.pdf`, línea 92 del texto extraído.
 **Verificado:** sí, exacto.
+**Resultado en la prueba (semana 3):** ✅ Utilizable — el nombre de la especialista se verificó también contra la lista real de anotadores del documento.
 
 ### 4. Kappa de estenosis del canal, MRI vs. MRM
 **Pregunta:** ¿En cuánto mejoró el acuerdo interobservador entre radiólogos al agregar mielografía por resonancia (MRM) a la resonancia convencional, para evaluar estenosis del canal espinal?
 **Respuesta esperada:** De moderado (kappa 0.40) con MRI sola, a bueno (kappa 0.60) con MRM.
 **Fuente:** Al-Tameemi et al. (2017), Tabla 2, página 200-201.
 **Verificado:** sí, exacto (confirmado con el PDF completo).
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 5. Kappa entre radiólogo y neurocirujano
 **Pregunta:** ¿El acuerdo entre radiólogo y neurocirujano mejoró al agregar MRM?
 **Respuesta esperada:** No — se mantuvo bajo/limitado (kappa 0.33-0.38), sin cambio significativo.
 **Fuente:** Al-Tameemi et al. (2017), Tabla 2, página 201.
 **Verificado:** sí, exacto.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 6. Tamaño de muestra de Al-Tameemi et al.
 **Pregunta:** ¿Cuántos pacientes y niveles de disco se evaluaron en el estudio de Al-Tameemi et al. sobre mielografía por resonancia?
 **Respuesta esperada:** 30 pacientes, 150 niveles de disco intervertebral.
 **Fuente:** Al-Tameemi et al. (2017), página 198-199.
 **Verificado:** sí, exacto.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 7. Mejor arquitectura para estenosis del canal espinal (SCS)
 **Pregunta:** ¿Qué arquitectura de Vision Transformer obtuvo la mejor precisión de validación para clasificar estenosis del canal espinal, y cuál fue el valor?
 **Respuesta esperada:** ViT-L/16, con 92.41% de precisión de validación (el resultado más alto de las 5 condiciones evaluadas).
 **Fuente:** "Beyond Accuracy" (preprint 2026), tabla de resultados.
 **Verificado:** sí, exacto, cotejado línea por línea contra el PDF.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 8. Métrica CLOA
 **Pregunta:** ¿Qué es la métrica CLOA (Condition-Level Ordinal Accuracy) y qué valor obtuvo para estenosis del canal espinal?
 **Respuesta esperada:** Otorga crédito completo a aciertos exactos, parcial a errores adyacentes y cero a diferencias de dos grados; para SCS fue 95.79%.
 **Fuente:** "Beyond Accuracy" (preprint 2026).
 **Verificado:** sí, exacto.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 9. Factores de riesgo de la estenosis lumbar
 **Pregunta:** ¿Qué factores de riesgo para estenosis espinal lumbar menciona Bagley et al.?
 **Respuesta esperada:** Obesidad, tabaquismo, factores genéticos no completamente elucidados, y edad como el factor más importante.
 **Fuente:** Bagley et al. (2019), Abstract y sección "Introduction", página 1-3.
 **Verificado:** sí, confirmado con el PDF completo.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 10. Evidencia de nivel I en tratamiento de estenosis
 **Pregunta:** ¿Existen recomendaciones de nivel I (la evidencia más fuerte) para el tratamiento de la estenosis lumbar, según Bagley et al.?
 **Respuesta esperada:** No — el artículo aclara explícitamente que no pueden darse recomendaciones de nivel I por falta de evidencia concluyente.
 **Fuente:** Bagley et al. (2019), Abstract, página 1.
 **Verificado:** sí, exacto.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 11. Modelo M-SCAN
 **Pregunta:** ¿Qué es M-SCAN y qué AUROC reportó, sobre cuántos estudios?
 **Respuesta esperada:** Modelo multietapa de Batra et al. que combina vistas sagitales y axiales con atención cruzada; AUROC de 0.971 sobre 1,975 estudios.
 **Fuente:** Citado dentro de "Beyond Accuracy" (preprint 2026), y el paper original de Batra et al. en arXiv:2503.01634.
 **Verificado:** sí, exacto, doble confirmación.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 12. Método finite element de Xin Yi/Cai
 **Pregunta:** ¿Qué tipo de estudio es el de Xin Yi (Cai) et al. sobre degeneración del disco L4-L5, y qué evalúa?
 **Respuesta esperada:** Un estudio de elementos finitos (finite element study) que evalúa el efecto biomecánico de la degeneración del disco L4-L5 sobre la columna lumbar inferior.
 **Fuente:** `OS-12-917.pdf`, título y abstract.
 **Verificado:** sí.
+**Resultado en la prueba (semana 3):** ✅ Utilizable.
 
 ### 13. Kappas del sistema de Miskin et al.
 **Pregunta:** ¿Qué valores de kappa reportó el sistema de gradación de Miskin et al. entre especialistas no radiólogos, para las distintas regiones anatómicas?
@@ -206,12 +221,14 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 **Fuente:** Miskin et al. (2021), *Pain Medicine*, DOI 10.1093/pm/pnab098.
 **Verificado:** sí, exacto (mismo caso documentado en el inventario de fallos).
 **Nota:** esta pregunta es útil para volver a probar el sistema *después* de que Miskin ya esté correctamente incluido en el corpus — sirve como control de que el fallo anterior (citarlo sin tenerlo cargado) ya no se repite.
+**Resultado en la prueba (semana 3):** ✅ **Utilizable — hallazgo clave.** El sistema citó correctamente los 4 valores de kappa, separados por región, atribuidos a Miskin, con ubicación localizable. Confirma que el fallo documentado en la semana 2 ya no ocurre con el corpus completo.
 
 ### 14. Paradigmas de IA según Abdelrahman et al.
 **Pregunta:** ¿Qué paradigmas de arquitecturas de IA para análisis de RM lumbar describe Abdelrahman et al., y qué rango de desempeño reportan?
 **Respuesta esperada:** Modelos híbridos, cascadas multietapa, fusión cross-modal y ensambles; con coeficientes Dice superiores a 0.90 y AUC de hasta 0.98.
 **Fuente:** Abdelrahman et al. (2026), *Journal of Smart Algorithms and Applications*.
 **Verificado:** sí, confirmado por Juan David con el PDF real.
+**Resultado en la prueba (semana 3):** ✅ Utilizable — primera vez que el sistema responde directamente desde el PDF de Abdelrahman; el rango de precisión reportado (71.5%–99.42%) es consistente con el documento.
 
 ---
 
@@ -220,29 +237,30 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 ### 15. Prevalencia en Colombia
 **Pregunta:** Según estos documentos, ¿cuál es la prevalencia de espondilolistesis degenerativa en población colombiana?
 **Respuesta esperada del sistema:** Debe decir explícitamente que no está en las fuentes.
-**Ya probada:** sí — NotebookLM se abstuvo correctamente y no inventó una cifra (ver Tratamiento C de Camilo).
+**Resultado en la prueba (semana 3):** ✅ Abstención correcta — no inventó una cifra; mencionó el único dato real relacionado (participación de la Fundación Santa Fe de Bogotá en la anotación del dataset).
 
 ### 16. Resultados de la competencia Kaggle
 **Pregunta:** ¿Qué equipo o modelo obtuvo el primer lugar en la competencia Kaggle RSNA 2024 Lumbar Spine Degenerative Classification, y qué puntaje logró?
-**Respuesta esperada del sistema:** Debe abstenerse — ninguno de los 9 documentos del corpus reporta resultados de la tabla de posiciones (leaderboard) de la competencia.
-**Por probar.**
+**Respuesta esperada del sistema:** Debe abstenerse — ninguno de los 10 documentos del corpus reporta resultados de la tabla de posiciones (leaderboard) de la competencia.
+**Resultado en la prueba (semana 3):** ✅ Abstención correcta — el sistema indicó explícitamente que no encontró esa información, sin inventar equipo ni puntaje.
 
 ### 17. Guía NASS
 **Pregunta:** Según la guía clínica de la North American Spine Society (NASS) de 2013, ¿cuál es el tratamiento de primera línea recomendado para estenosis lumbar leve?
 **Respuesta esperada del sistema:** Debe abstenerse o aclarar que solo tiene menciones indirectas de NASS citadas dentro de Bagley et al., no el documento original de la guía.
-**Por probar.** (Riesgo de "casi acierto": el sistema podría mezclar lo poco que Bagley menciona sobre NASS con conocimiento externo — vale la pena observar con cuidado.)
+**Resultado en la prueba (semana 3):** ✅ Abstención correcta, con el matiz más fino del banco. El sistema respondió solo con lo que Bagley et al. cita de la guía NASS (vía Kreiner et al.) y aclaró explícitamente que no tiene el texto íntegro de la guía original. Se verificó que "Kreiner et al." es real: es la referencia 19 de la bibliografía de Bagley et al. (Kreiner DS, Shaffer WO, Baisden JL, et al., *Spine Journal*, 2013).
 
 ### 18. Costos de la cirugía en el sistema de salud colombiano
 **Pregunta:** ¿Cuál es el costo promedio de una cirugía de descompresión lumbar en el sistema de salud colombiano, según estos documentos?
 **Respuesta esperada del sistema:** Debe abstenerse — ningún documento del corpus trata costos ni el sistema de salud colombiano (Bagley menciona costos en EE.UU., no en Colombia).
-**Por probar.** (Pregunta trampa: si el sistema mezcla la cifra de EE.UU. de Bagley con "Colombia", sería un fallo de contaminación cruzada entre fuentes.)
+**Resultado en la prueba (semana 3):** ✅ Abstención correcta — no mezcló la cifra de EE. UU. de Bagley et al. con Colombia; distinguió claramente el origen de los datos que sí tenía.
 
 ---
 
 ## Resumen
 
-- **14 preguntas con respuesta verificable**, todas con documento y ubicación exacta ya confirmados por el equipo antes de esta evaluación.
-- **4 preguntas sin respuesta en el corpus**, una ya probada (abstención correcta), tres pendientes — dos de ellas (17 y 18) diseñadas como "preguntas trampa" que podrían inducir al sistema a mezclar información de fuentes reales de forma incorrecta, en vez de simplemente inventar de la nada.
+- **14 preguntas con respuesta verificable**: 14/14 correctas y citadas (100%).
+- **4 preguntas sin respuesta en el corpus** (trampa): 4/4 con abstención correcta (100%), incluida la pregunta 17 con una calificación matizada en lugar de una abstención simple.
+- **Total: 18/18 (100%)**, sin fallos nuevos detectados en esta ronda. El detalle completo de la ejecución y la verificación de los dos datos nuevos (pregunta 3 y 17) está en `RESULTADOS_banco_preguntas.md`.
 
 ## 1. El experimento
 
@@ -260,7 +278,7 @@ Se diseñó un experimento de tres tratamientos sobre 2 consultas bibliográfica
 
 ## Herramienta elegida y comparación
 
-Se comparó **NotebookLM** contra **Proyecto con archivos** (Claude/ChatGPT Projects) en 6 criterios: contexto cerrado, cita con localización, privacidad, costo, exportación APA 7, reproducibilidad. NotebookLM gana en 3 (contexto cerrado, cita con localización,costo), empata en 2, pierde en 1 (reproducibilidad del protocolo, compensadadocumentando por escrito el protocolo de prompts). Se eligió **NotebookLM**, principalmente por su capacidad de citar con localización exacta dentro del documento, verificada en la práctica durante el experimento.
+Se comparó **NotebookLM** contra **Proyecto con archivos** (Claude/ChatGPT Projects) en 6 criterios: contexto cerrado, cita con localización, privacidad, costo, exportación APA 7, reproducibilidad. NotebookLM gana en 3 (contexto cerrado, cita con localización, costo), empata en 2, pierde en 1 (reproducibilidad del protocolo, compensada documentando por escrito el protocolo de prompts). Se eligió **NotebookLM**, principalmente por su capacidad de citar con localización exacta dentro del documento, verificada en la práctica durante el experimento.
 
 - # 3. Sistema
 
@@ -287,7 +305,7 @@ Se comparó **NotebookLM** contra **Proyecto con archivos** (Claude/ChatGPT Proj
 
 ### 1. `073c3e60427aacf6b4b5ee6f0c398401.pdf`
 * **Título original:** *Simplified Universal Grading of Lumbar Spine MRI Degenerative Findings: Inter-Reader Agreement of Non-Radiologist Spine Experts*.
-* **Autores:** Nityanand Miskin, Zacharia Isaac, Yi Lu, Melvin C. Makhni, Danielle L. Sarno, Timothy R. Smith, Jay M. Zampini y Jacob C. Mandell (Brigham and Women’s Hospital, Harvard Medical School).
+* **Autores:** Nityanand Miskin, Zacharia Isaac, Yi Lu, Melvin C. Makhni, Danielle L. Sarno, Timothy R. Smith, Jay M. Zampini y Jacob C. Mandell (Brigham and Women's Hospital, Harvard Medical School).
 * **Publicación:** *Pain Medicine* (2021).
 * **DOI:** [10.1093/pm/pnab098](https://doi.org/10.1093/pm/pnab098).
 * **Objetivo:** Describir un sistema de graduación multidisciplinario simplificado para hallazgos degenerativos en RM lumbar y evaluar el acuerdo inter-observador entre expertos no radiólogos.
@@ -358,8 +376,7 @@ Se comparó **NotebookLM** contra **Proyecto con archivos** (Claude/ChatGPT Proj
 * **Autores:** Haider Najim Al-Tameemi, Sattar Al-Essawi, Mahmud Shukri y Farah Kasim Naji.
 * **Publicación:** *Asian Spine Journal* (2017).
 * **DOI:** [10.4184/asj.2017.11.2.198](https://doi.org/10.4184/asj.2017.11.2.198).
-* **Objetivo:** Determinar si la Mielografía por RM (MRM) junto a la RM convencional mejora el acuerdo entre observadores.
-* **Metodología:** Estudio transversal en 30 pacientes (150 niveles discales) evaluados por dos radiólogos y un neurocirujano mediante RM sola y RM + MRM.
+* **Objetivo:** Determinar si la Mielografía por RM (MRM) junto a la RM convencional mejora el acuerdo entre observadores. * **Metodología:** Estudio transversal en 30 pacientes (150 niveles discales) evaluados por dos radiólogos y un neurocirujano mediante RM sola y RM + MRM.
 * **Resultados clave:**
   * Estenosis del canal: El acuerdo entre radiólogos aumentó de moderado ($\kappa = 0,40$) a bueno ($\kappa = 0,60$).
   * Compresión radicular: El acuerdo entre radiólogos mejoró de $\kappa = 0,57$ a $\kappa = 0,73$.
@@ -390,7 +407,7 @@ Se comparó **NotebookLM** contra **Proyecto con archivos** (Claude/ChatGPT Proj
 * **Metodología:** Revisión estructurada a partir de una búsqueda sistemática realizada por dos radiólogos en las bases de datos PubMed, Embase y Web of Science. Se evaluaron y sintetizaron 17 estudios representativos (publicados entre 2014 y 2024), desde clasificadores tradicionales (SVM, Random Forest) hasta redes neuronales convolucionales (CNN, SpineNet, ResNet, U-Net) y modelos híbridos combinados con Transformers.
 * **Resultados clave:** Los sistemas de IA alcanzaron una alta precisión y reproducibilidad en la graduación automatizada de IDD bajo la escala Pfirrmann.
 * **Conclusión:** La IA aplicada a la RM lumbar posee un gran potencial para mejorar la eficiencia y eliminar la subjetividad en el diagnóstico de la degeneración discal, sin embargo su implementación clínica real exige superar retos en cuanto a la generalizabilidad entre distintos centros, la heterogeneidad de los datos, la interpretabilidad de los modelos y la realización de validaciones prospectivas a gran escala.
-* **Cita recomendada:** Zhao, P., & Zhu, S. (2026). Advances and challenges in AI-assisted MRI for lumbar disc degeneration detection and classification. European Spine Journal, 35(3), 1291–1300 , doi:10.1007/s00586-025-09179-z.
+* **Cita recomendada:** Zhao, P., & Zhu, S. (2026). Advances and challenges in AI-assisted MRI for lumbar disc degeneration detection and classification. European Spine Journal, 35(3), 1291–1300, doi:10.1007/s00586-025-09179-z.
 
 ---
 
@@ -399,8 +416,7 @@ Se comparó **NotebookLM** contra **Proyecto con archivos** (Claude/ChatGPT Proj
 * **Autores:** Emanuel-Crăciun Trînc, Cosmin Ancuți, Codruța Ancuți y Emil-Radu Iacob.
 * **Publicación:** *Preprints.org* (2026).
 * **DOI:** [10.20944/preprints202608.1250.v1](https://doi.org/10.20944/preprints202608.1250.v1).
-* **Objetivo:** Proponer una graduación ordinal multinivel con Vision Transformers (ViT) sobre el dataset RSNA LumbarDISC.
-* **Metodología:** Entrenamiento de 5 pipelines ViT especializados. Desarrollo de las métricas ordinales CLOA (Condition-Level) y PLOA (Patient-Level) para considerar la severidad de las discrepancias diagnósticas.
+* **Objetivo:** Proponer una graduación ordinal multinivel con Vision Transformers (ViT) sobre el dataset RSNA LumbarDISC. * **Metodología:** Entrenamiento de 5 pipelines ViT especializados. Desarrollo de las métricas ordinales CLOA (Condition-Level) y PLOA (Patient-Level) para considerar la severidad de las discrepancias diagnósticas.
 * **Resultados clave:** Precisión global de 82% a 92%. Demuestra que las métricas ordinales reflejan con mayor fidelidad la gravedad clínica del error diagnóstico.
 * **Conclusión:** Permite integrar modelos de IA en asistentes explicables para la generación de reportes estructurados.
 * **Cita recomendada:** Trînc et al. (2026). *Beyond Accuracy: Multi-Level Ordinal Assessment of Lumbar Spine Degeneration*. Preprints.org, doi:10.20944/preprints202608.1250.v1.
@@ -469,7 +485,7 @@ Convención de estado:
 
 | # | Afirmación de la diapositiva | Fuente citada | ¿Fuente real? | ¿Coincide el contenido? | Verificado por / fecha |
 |---|---|---|---|---|---|
-| 8.1 | "Desarrollado por un grupo de especialistas en neurocirugía, ortopedia, fisiatría, radiología; compara concordancia entre especialidades y no solo entre radiólogos." | Miskin, N., et al. (2021) | ✅ Confirmado por Juan David — real, *Pain Medicine*, DOI `10.1093/pm/pnab098`, autores Miskin, Isaac, Lu, Makhni, Sarno, Smith, Zampini, Mandell | ❌ **Fallo confirmado del sistema, no de la bibliografía.** El artículo sí respalda el contenido de la diapositiva (kappas 0.702/0.544/0.557/0.323 entre especialistas no radiólogos). El problema es que, cuando corrimos el Tratamiento C en NotebookLM, **el PDF de Miskin todavía no estaba subido al notebook** — Juan David lo subió un día después, junto con otras fuentes. Es decir, NotebookLM citó estos valores exactos como si vinieran del corpus de 6 documentos que sí tenía cargados en ese momento, cuando en realidad no estaban ahí. **Este es el caso de fallo oficial del sistema para la semana 3.** | Juan David + equipo, 26-sep-2026 — confirmado |
+| 8.1 | "Desarrollado por un grupo de especialistas en neurocirugía, ortopedia, fisiatría, radiología; compara concordancia entre especialidades y no solo entre radiólogos." | Miskin, N., et al. (2021) | ✅ Confirmado por Juan David — real, *Pain Medicine*, DOI `10.1093/pm/pnab098`, autores Miskin, Isaac, Lu, Makhni, Sarno, Smith, Zampini, Mandell | ❌ **Fallo confirmado del sistema, no de la bibliografía.** El artículo sí respalda el contenido de la diapositiva (kappas 0.702/0.544/0.557/0.323 entre especialistas no radiólogos). El problema es que, cuando corrimos el Tratamiento C en NotebookLM, **el PDF de Miskin todavía no estaba subido al notebook** — Juan David lo subió un día después, junto con otras fuentes. Es decir, NotebookLM citó estos valores exactos como si vinieran del corpus de 6 documentos que sí tenía cargados en ese momento, cuando en realidad no estaban ahí. **Este es el caso de fallo oficial del sistema para la semana 3**, y ya se confirmó corregido: ver banco de preguntas, pregunta 13. | Juan David + equipo, 26-sep-2026 — confirmado y re-probado en semana 3 |
 | 8.2 | "Muestra una combinación entre mielografía y resonancia magnética." | Al-Tameemi, H.N., et al. (2017) | ✅ Sí, *Asian Spine Journal*, DOI `10.4184/asj.2017.11.2.198` | ✅ **Coincide, pero es una síntesis muy pobre** (confirmado con el PDF completo, página 200-201, Tablas 2 y 3). 30 RM lumbares (150 niveles de disco) revisadas por dos radiólogos y un neurocirujano, comparando MRI sola vs. MRI + mielografía (MRM); el acuerdo interobservador mejoró de moderado (kappa 0.4) a bueno (kappa 0.6) para estenosis del canal, y de moderado a bueno (kappa 0.57→0.73) para compresión radicular. La diapositiva reduce todo esto a "muestra una combinación" y omite el hallazgo real (que la combinación mejora el acuerdo, medido con kappa) — que es justo el dato con el que su propio anteproyecto podría conectar, ya que ustedes también miden acuerdo con kappa. | Leído completo, página 200-201 (Tablas 2 y 3) — 24-sep-2026 |
 | 8.3 | "Con 37 médicos de seis especialidades, revisa la exactitud general pre-intervención con y sin capacitación." | Walsh, P.J., et al. (2026) | ✅ Sí, *Academic Radiology* — pero **nombres de autores mal separados en la bibliografía** ("Walsh, J. Un, J.L." en vez de Walsh, Lee, Lipetz, Walz) | ✅ **Coincide** — se confirmó vía resumen del artículo: 37 médicos, seis especialidades, exactitud mejoró de 54.5% a 61.2% tras capacitación estructurada | Búsqueda dirigida, 22-sep-2026 — cita a corregir, contenido correcto |
 
@@ -515,9 +531,36 @@ mostrar en la sustentación si el docente señala cualquiera de estas frases.
 
 # 5. Declaración del uso de IA
 
-Se usaron Google Gemini y Claude como una herramienta de apoyo, para hacer el código 
-ejecutable y consultas técnicas, teniendo también la validación posterior de lo que arroja,
-sin poner de inmediato cada cosa que la IA arrojó, sino revisándola primero mediante 
-ejecución de los códigos y revisión de fuentes y recursos.
-El agente de IA usado no dio diagnósticos médicos ni recomendaciones clínicas, solo 
-análisis bioestadístico de datos según los requerimientos.
+El proyecto usó inteligencia artificial en tres niveles distintos, que conviene no mezclar:
+
+1. **El agente de consultoría bioestadística** (`gemini-3.6-flash`), construido por el equipo
+   como objeto de estudio del anteproyecto original — recomendó pruebas estadísticas, código en
+   R y pasos de análisis para el dataset RSNA LumbarDISC.
+2. **Claude**, usado como asistente de trabajo para auditar el anteproyecto contra las fuentes
+   primarias, diseñar el experimento de tres tratamientos, construir el corpus, la tabla de
+   trazabilidad, el protocolo de prompts y el banco de preguntas, y redactar los documentos de
+   entrega.
+3. **NotebookLM**, el sistema final con cita obligatoria evaluado en el experimento y en el
+   banco de 18 preguntas.
+
+Se usaron estas herramientas como apoyo para hacer código ejecutable y resolver consultas
+técnicas, siempre con validación posterior de lo que arrojaban — revisando primero mediante
+ejecución de los códigos y cotejo contra las fuentes y recursos originales, sin dar por buena
+ninguna afirmación solo porque sonara plausible. El agente de IA usado no dio diagnósticos
+médicos ni recomendaciones clínicas, solo análisis bioestadístico de datos según los
+requerimientos del proyecto.
+
+Tres casos, documentados con fecha y evidencia, muestran qué pasó cuando la IA se equivocó y
+qué hizo el equipo al respecto (detalle completo en `DECLARACION_uso_de_IA.md`):
+
+- **NotebookLM citó contenido fuera de su propio corpus** (kappas de Miskin et al., sin que el
+  PDF estuviera cargado en el momento de la consulta) — detectado, corregido agregando el PDF
+  real, y confirmado corregido en la prueba de la semana 3 (ver pregunta 13 del banco).
+- **Claude generó una cita no verificada** en un borrador intermedio — detectado y corregido
+  por el propio equipo antes de llegar a un entregable final.
+- **Una conclusión de "no localizable" resultó ser un error de búsqueda, no una invención**
+  (caso Chai et al.) — corregido en todos los documentos afectados en cuanto apareció la fuente
+  real.
+
+Ningún dato, cifra o cita generada por IA se incluyó en un entregable sin que un integrante del
+equipo la contrastara primero contra la fuente primaria.
