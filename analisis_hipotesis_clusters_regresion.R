@@ -1,18 +1,20 @@
 # ==============================================================================
-# SCRIPT DE ANÁLISIS ESTADÍSTICO Y CLUSTERING PARA PATOLOGÍAS LUMBARES
+# SCRIPT DE ANÁLISIS ESTADÍSTICO PARA PATOLOGÍAS LUMBARES
 # Dataset: train_limpio_imputado.csv
 # ==============================================================================
 
 # 1. CARGA DE PAQUETES REQUERIDOS
 # ------------------------------------------------------------------------------
 # Si no tienes instalados los paquetes, ejecuta:
-# install.packages(c("tidyverse", "cluster", "factoextra", "FactoMineR", "vcd"))
+# install.packages(c("tidyverse", "cluster", "factoextra", "FactoMineR", "vcd", "MASS", "ordinal"))
 
 library(tidyverse)   # Manipulación de datos y visualización (dplyr, ggplot2, readr)
 library(cluster)     # Algoritmo K-Medoides (PAM) y matriz de distancia de Gower
 library(factoextra)  # Visualizaciones elegantes para Clustering y MCA
 library(FactoMineR)  # Análisis de Correspondencias Múltiples (MCA)
 library(vcd)         # Pruebas estadísticas para datos categóricos
+library(MASS)
+library(ordinal)
 
 # 2. CARGA Y PREPARACIÓN DE DATOS
 # ------------------------------------------------------------------------------
@@ -263,3 +265,86 @@ p_mca_ind <- fviz_mca_ind(mca_res,
                           title = "MCA - Mapa de Pacientes segun Perfil Lumbar")
 
 print(p_mca_ind)
+
+# ==============================================================================
+# 6. REGRESIÓN LOGÍSTICA ORDINAL
+# ==============================================================================
+
+df_ordinal <- df %>%
+  dplyr::select(-study_id) %>%
+  mutate(across(everything(), ~ factor(.x, levels = niveles, ordered = TRUE)))
+
+# Ajuste del Modelo de Regresión Logística Ordinal
+modelo_polr_l1_l2 <- polr(
+  spinal_canal_stenosis_l1_l2 ~ 
+    left_subarticular_stenosis_l1_l2 + 
+    right_subarticular_stenosis_l1_l2 + 
+    left_neural_foraminal_narrowing_l1_l2 + 
+    right_neural_foraminal_narrowing_l1_l2,
+  data = df_ordinal,
+  Hess = TRUE
+)
+
+# Resumen del modelo y Odds Ratios (OR)
+summary(modelo_polr_l1_l2)
+exp(cbind(OR = coef(modelo_polr_l1_l2), confint(modelo_polr_l1_l2)))
+
+# Ajuste del Modelo de Regresión Logística Ordinal
+modelo_polr_l2_l3 <- polr(
+  spinal_canal_stenosis_l2_l3 ~ 
+    left_subarticular_stenosis_l2_l3 + 
+    right_subarticular_stenosis_l2_l3 + 
+    left_neural_foraminal_narrowing_l2_l3 + 
+    right_neural_foraminal_narrowing_l2_l3,
+  data = df_ordinal,
+  Hess = TRUE
+)
+
+# Resumen del modelo y Odds Ratios (OR)
+summary(modelo_polr_l2_l3)
+exp(cbind(OR = coef(modelo_polr_l2_l3), confint(modelo_polr_l2_l3)))
+
+# Ajuste del Modelo de Regresión Logística Ordinal
+modelo_polr_l3_l4 <- polr(
+  spinal_canal_stenosis_l3_l4 ~ 
+    left_subarticular_stenosis_l3_l4 + 
+    right_subarticular_stenosis_l3_l4 + 
+    left_neural_foraminal_narrowing_l3_l4 + 
+    right_neural_foraminal_narrowing_l3_l4,
+  data = df_ordinal,
+  Hess = TRUE
+)
+
+# Resumen del modelo y Odds Ratios (OR)
+summary(modelo_polr_l3_l4)
+exp(cbind(OR = coef(modelo_polr_l3_l4), confint(modelo_polr_l3_l4)))
+
+# Ajuste del Modelo de Regresión Logística Ordinal
+modelo_polr_l4_l5 <- polr(
+  spinal_canal_stenosis_l4_l5 ~ 
+    left_subarticular_stenosis_l4_l5 + 
+    right_subarticular_stenosis_l4_l5 + 
+    left_neural_foraminal_narrowing_l4_l5 + 
+    right_neural_foraminal_narrowing_l4_l5,
+  data = df_ordinal,
+  Hess = TRUE
+)
+
+# Resumen del modelo y Odds Ratios (OR)
+summary(modelo_polr_l4_l5)
+exp(cbind(OR = coef(modelo_polr_l4_l5), confint(modelo_polr_l4_l5)))
+
+# Ajuste del Modelo de Regresión Logística Ordinal
+modelo_polr_l5_s1 <- polr(
+  spinal_canal_stenosis_l5_s1 ~ 
+    left_subarticular_stenosis_l5_s1 + 
+    right_subarticular_stenosis_l5_s1 + 
+    left_neural_foraminal_narrowing_l5_s1 + 
+    right_neural_foraminal_narrowing_l5_s1,
+  data = df_ordinal,
+  Hess = TRUE
+)
+
+# Resumen del modelo y Odds Ratios (OR)
+summary(modelo_polr_l5_s1)
+exp(cbind(OR = coef(modelo_polr_l5_s1), confint(modelo_polr_l5_s1)))
