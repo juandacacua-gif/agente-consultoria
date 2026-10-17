@@ -30,3 +30,7 @@ Sí. Al seleccionar la referencia «1» en Notebook, aparece el documento The_RS
 
 
 - Conclusión: la respuesta de Notebook no inventó necesariamente las cifras del entrenamiento, pues dos de ellas están respaldadas por el documento identificado. Sin embargo, estas cifras describen el procedimiento de calibración de los anotadores, no una comparación de la exactitud médica antes y después de la capacitación.
+
+## Resultado (verificado contra el PDF)
+
+Abstención correcta sobre Walsh et al. (2026): NotebookLM dijo que no hay información sobre ese estudio en las fuentes. Los datos adicionales que agregó (10 casos de entrenamiento, 25 anotaciones por caso y umbral mínimo del 60 % de acuerdo con el consenso del comité) figuran en Richards et al. (2026), p. 18 del PDF. No hubo cifras inventadas, por lo que esta prueba no es un caso de fallo. Observación: no usó la frase fija de abstención del protocolo v1.0 y añadió contenido no solicitado.
