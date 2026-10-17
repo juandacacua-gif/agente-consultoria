@@ -3,6 +3,8 @@
 Consolidado de los inventarios individuales de los dos integrantes del equipo.
 Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
+> **Revisión del 17 de octubre de 2026:** se corrigió el Fallo 1 de Camilo (Abdelrahman et al. sí existe), se suavizó la caracterización del Fallo 5 y la explicación del mecanismo del Fallo 3, y se aclaró quién confirmó qué. El Fallo 1 de Juan David sigue con su nota pendiente.
+
 ---
 
 ## INVENTARIO DE FALLOS — Juan David Cacua
@@ -66,11 +68,11 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué generó:** Al revisar la diapositiva 7 del estado del arte, comparé la referencia citada —"Abdelrahman, M. A., Abd El Basset, A. S., Elngar, A. A. (2026). A Comprehensive Review of Artificial Intelligence for Lumbar Spine MRI Analysis. Journal of Software Engineering and Applications"— contra el PDF que teníamos guardado en el repositorio con ese propósito.
 
-**Qué estaba mal:** El PDF real en el repositorio no era de Abdelrahman et al., sino de Trento, A., Rapisarda, S., Bresolin, N., Valenti, A., Giordan, E. (2025), "Artificial Intelligence and Its Impact on the Management of Lumbar Degenerative Pathology: A Narrative Review", publicado en *Medicina*. Son dos artículos distintos, con autores y revista distintos, y no hay forma de saber si Abdelrahman et al. (2026) existe de verdad o si fue una confusión al armar la bibliografía original.
+**Qué estaba mal:** El PDF real en el repositorio no era de Abdelrahman et al., sino de Trento, A., Rapisarda, S., Bresolin, N., Valenti, A., Giordan, E. (2025), "Artificial Intelligence and Its Impact on the Management of Lumbar Degenerative Pathology: A Narrative Review", publicado en *Medicina*. Son dos artículos distintos, con autores y revista distintos, El artículo de Abdelrahman et al. (2026) **sí existe** (DOI `10.66279/r8h6j935`; la revista real es *Journal of Smart Algorithms and Applications*, no *Journal of Software Engineering and Applications*). El fallo fue de archivo: se guardó el PDF de Trento bajo la cita de Abdelrahman. Se confirmó después, y esta descripción quedó desactualizada hasta esta revisión.
 
 **Cómo lo detecté:** Al pedirle a Claude que verificara con una búsqueda real cada referencia de la bibliografía contra los documentos que teníamos guardados, en vez de asumir que el nombre del archivo o la cita coincidían.
 
-**Qué me costó:** Tiempo de revisión de toda la bibliografía completa (las 10 referencias), y ahora tengo que decidir con mi compañero cuál de los dos artículos es la fuente real de esa diapositiva antes de poder corregirla.
+**Qué me costó:** Tiempo de revisión de toda la bibliografía completa (las 10 referencias), y decidir cómo corregir la diapositiva. La frase de la diapositiva 7 mezcla las dos fuentes (Trento et al., pp. 1–2; Abdelrahman et al., p. 2 del PDF), así que se propone citar ambas o dividir la frase (ver `correcciones_anteproyecto.md`).
 
 **Qué lo habría evitado:** Verificar cada PDF contra su cita en el momento de guardarlo en el repositorio, en vez de confiar en que el nombre del archivo correspondía a la referencia de la bibliografía.
 
@@ -80,7 +82,7 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué generó:** Al buscar la referencia "Xin Yi, C., et al. (2020). Biomechanical Effect of L4–L5 Intervertebral Disc Degeneration on the Lower Lumbar Spine." citada en la bibliografía del anteproyecto, y compararla luego contra el PDF real, encontramos que el nombre del primer autor está invertido.
 
-**Qué estaba mal:** El primer autor real es **Cai, Xin-yi** (apellido Cai, nombre de pila Xin-yi, en orden de nombre chino), no "Xin Yi, C." como aparece en la bibliografía — quedó tratado como si "Xin Yi" fuera el apellido y "C." la inicial del nombre. Es el mismo patrón que encontramos en otras dos referencias de la misma bibliografía: Walsh et al. (2026), donde el segundo autor "Lee, Un Jung" (nombre coreano) quedó fusionado con el apellido de Walsh; y la referencia de "Beyond Accuracy", donde los autores reales quedaron omitidos por completo y se citó "Preprints." como si fuera el autor. En total, **tres de las diez referencias de la bibliografía tienen el mismo tipo de error: nombres de autores no occidentales mal formateados o incompletos** — no parece un error aislado, sino un patrón sistemático en cómo se armó la bibliografía original.
+**Qué estaba mal:** El primer autor real es **Cai, Xin-yi** (apellido Cai, nombre de pila Xin-yi, en orden de nombre chino), no "Xin Yi, C." como aparece en la bibliografía — quedó tratado como si "Xin Yi" fuera el apellido y "C." la inicial del nombre. Es el mismo patrón que encontramos en otras dos referencias de la misma bibliografía: Walsh et al. (2026), donde el segundo autor "Lee, Un Jung" (nombre coreano) quedó fusionado con el apellido de Walsh; y la referencia de "Beyond Accuracy", donde los autores reales quedaron omitidos por completo y se citó "Preprints." como si fuera el autor. En total, **tres de las diez referencias de la bibliografía tienen errores en los nombres de autores** (dos de ellas con nombres no occidentales mal separados, y la de "Beyond Accuracy" con los autores omitidos). Con tres casos no se puede afirmar un patrón sistemático; sí indica que los nombres se escribieron a mano sin verificar.
 
 **Cómo lo detecté:** Comparando el nombre del autor tal como aparece en la bibliografía del anteproyecto contra el nombre real que figura en el PDF del artículo (una vez Juan David lo confirmó con el DOI real, `10.1111/os.12703`).
 
@@ -96,7 +98,7 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué generó:** Al pedirle a NotebookLM que respondiera *solo* con base en esos 6 documentos sobre el acuerdo entre lectores en la gradación de estenosis lumbar, dio una respuesta detallada que incluía valores exactos de kappa (0.702 para estenosis del canal, 0.544 para estenosis foraminal, 0.557 para artropatía facetaria, 0.323 para receso lateral) atribuidos a "un sistema de gradación simplificado... expertos en columna no radiólogos", con un número de cita `[5]` como si viniera de las fuentes cargadas.
 
-**Qué estaba mal:** Ninguno de los 6 PDF que le dimos contenía esos valores ni la palabra "Miskin". Confirmamos línea por línea contra el texto completo de los 6 documentos: no aparecían en ninguno. Los valores sí son reales — pertenecen al artículo de Miskin et al. (2021), *Pain Medicine*, DOI `10.1093/pm/pnab098` — pero mi compañero confirmó que **subió ese PDF al notebook un día después** de que hiciéramos esta prueba, junto con otras fuentes. Es decir, NotebookLM citó contenido que no estaba disponible en el momento de la consulta, a pesar de la instrucción explícita de responder solo con lo que se le había subido.
+**Qué estaba mal:** Ninguno de los 6 PDF que le dimos contenía esos valores ni la palabra "Miskin". Confirmamos línea por línea contra el texto completo de los 6 documentos: no aparecían en ninguno. Los valores sí son reales — pertenecen al artículo de Miskin et al. (2021), *Pain Medicine*, DOI `10.1093/pm/pnab098` — pero Juan David confirmó que **subió ese PDF al notebook un día después** de que hiciéramos esta prueba, junto con otras fuentes. En la clasificación del experimento, Camilo marcó este caso como no utilizable y Juan lo había marcado como utilizable. Es decir, NotebookLM citó contenido que no estaba disponible en el momento de la consulta, a pesar de la instrucción explícita de responder solo con lo que se le había subido.
 
 **Cómo lo detecté:** Extrayendo el texto completo de los 6 PDF originales con `pdftotext` y buscando los valores numéricos exactos y el nombre "Miskin" en todos ellos — no bastaba con confiar en que el número de cita `[5]` de la interfaz apuntara a algo real, había que comprobarlo contra el contenido real de cada archivo.
 
@@ -104,10 +106,13 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 
 **Qué lo habría evitado:** Llevar un registro exacto de qué documentos estaban cargados en el notebook en el momento preciso de cada prueba del experimento, en vez de asumir que "el corpus" es siempre el mismo conjunto de archivos a lo largo del tiempo.
 
-> Este es, de los tres, el fallo más útil para la sustentación: tiene fecha exacta,
-> confirmación cruzada de dos personas, y un mecanismo claro (herramienta de contexto
-> cerrado que igual mezcla conocimiento externo cuando el tema es muy conocido). Lo
-> proponemos como el **caso de fallo oficial** para el entregable de la semana 3.
+> Este es, de los tres, el fallo más útil para la sustentación: tiene fecha de carga
+> confirmada por Juan David y los valores se verificaron contra el texto de los 6 PDF.
+> El mecanismo no está demostrado: la hipótesis es que una herramienta de contexto
+> cerrado puede mezclar conocimiento externo cuando el tema es muy conocido, pero no lo
+> probamos. Lo proponemos como el **caso de fallo oficial** para el entregable de la
+> semana 3. La prueba con Walsh et al. (17-oct-2026) **no** fue un fallo: NotebookLM se
+> abstuvo correctamente.
 
 ---
 
@@ -118,8 +123,8 @@ Cada uno documentó al menos tres fallos, detectados de forma independiente.
 | 1 | Función de R mal caracterizada (`tidy`) — *descripción pendiente de ajustar* | Juan David | Código / herramienta |
 | 2 | Regresión politómica en vez de ordinal | Juan David | Conceptual / estadístico |
 | 3 | Orden de factores en gráfico | Juan David | Código, menor |
-| 4 | Trento citado bajo la cita de Abdelrahman (PDF equivocado en el repo) | Camilo | Cita bibliográfica — archivo mal vinculado |
-| 5 | Tres referencias con nombres de autores no occidentales mal formateados (Walsh/Lee, Beyond Accuracy, Xin Yi/Cai) | Camilo | Patrón sistemático de formato de cita |
+| 4 | Trento guardado bajo la cita de Abdelrahman (PDF equivocado en el repo; Abdelrahman sí existe) | Camilo | Cita bibliográfica — archivo mal vinculado |
+| 5 | Tres referencias con errores en los nombres de autores (Walsh/Lee, Beyond Accuracy, Xin Yi/Cai) | Camilo | Error de formato de cita, repetido |
 | 6 | **NotebookLM citó a Miskin et al. sin que ese PDF estuviera en el corpus subido en el momento de la consulta** | Camilo | **Fallo del sistema de contexto cerrado — caso oficial para semana 3** |
 
 Seis fallos documentados entre los dos, con variedad de tipos (código, estadístico,
