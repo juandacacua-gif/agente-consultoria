@@ -6,6 +6,8 @@ abstiene correctamente o inventa una respuesta.
 
 Formato: pregunta → respuesta esperada → documento y ubicación exacta → cómo se verificó.
 
+**Estado (17 de octubre de 2026):** las 18 preguntas se aplicaron a NotebookLM. Los resultados y las clasificaciones están en `RESULTADOS_banco_preguntas.md`; este archivo describe solo el diseño del banco (pregunta, respuesta esperada y fuente).
+
 ---
 
 ## Preguntas CON respuesta en el corpus (14)
@@ -19,13 +21,13 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 ### 2. Escala de severidad usada en LumbarDISC
 **Pregunta:** ¿Cómo se construyó la escala de severidad de 3 niveles del dataset, y por qué se redujo de 4 a 3?
 **Respuesta esperada:** Se combinaron los grados "Normal" y "Leve" en una sola categoría para aumentar el consenso entre anotadores; quedó en Normal/Leve, Moderada, Severa.
-**Fuente:** `The_RSNA_Lumbar_Degenerative_Imaging_Spine_Classif.pdf`, línea 175 y 528-529 del texto extraído.
+**Fuente:** `The_RSNA_Lumbar_Degenerative_Imaging_Spine_Classif.pdf`. [PENDIENTE: número de página; las líneas del texto extraído no se pueden auditar.]
 **Verificado:** sí, confirmado con `pdftotext` sobre el PDF real.
 
 ### 3. Institución colombiana en el dataset
 **Pregunta:** ¿Qué institución colombiana participó como anotadora en el dataset LumbarDISC, y quién fue la especialista?
 **Respuesta esperada:** Fundación Santa Fe de Bogotá; la especialista es la Dra. Angela Guarnizo Capera.
-**Fuente:** `The_RSNA_Lumbar_Degenerative_Imaging_Spine_Classif.pdf`, línea 92 del texto extraído.
+**Fuente:** `The_RSNA_Lumbar_Degenerative_Imaging_Spine_Classif.pdf`. [PENDIENTE: número de página; las líneas del texto extraído no se pueden auditar.]
 **Verificado:** sí, exacto.
 
 ### 4. Kappa de estenosis del canal, MRI vs. MRM
@@ -42,7 +44,7 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 
 ### 6. Tamaño de muestra de Al-Tameemi et al.
 **Pregunta:** ¿Cuántos pacientes y niveles de disco se evaluaron en el estudio de Al-Tameemi et al. sobre mielografía por resonancia?
-**Respuesta esperada:** 30 pacientes, 150 niveles de disco intervertebral.
+**Respuesta esperada:** 30 pacientes (18 mujeres y 12 hombres, de 25 a 65 años) y 150 niveles de disco intervertebral. El resumen dice "30 lumbar spinal MRI"; el texto completo dice "30 patients".
 **Fuente:** Al-Tameemi et al. (2017), página 198-199.
 **Verificado:** sí, exacto.
 
@@ -94,6 +96,7 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 **Respuesta esperada:** Modelos híbridos, cascadas multietapa, fusión cross-modal y ensambles; con coeficientes Dice superiores a 0.90 y AUC de hasta 0.98.
 **Fuente:** Abdelrahman et al. (2026), *Journal of Smart Algorithms and Applications*.
 **Verificado:** sí, confirmado por Juan David con el PDF real.
+**Nota:** el rango "71,5 % a 99 %" que aparece en ese PDF (p. 8 del PDF) es el de otra revisión (Liawrungrueang et al.), no un resultado propio de Abdelrahman et al.
 
 ---
 
@@ -102,26 +105,27 @@ Formato: pregunta → respuesta esperada → documento y ubicación exacta → c
 ### 15. Prevalencia en Colombia
 **Pregunta:** Según estos documentos, ¿cuál es la prevalencia de espondilolistesis degenerativa en población colombiana?
 **Respuesta esperada del sistema:** Debe decir explícitamente que no está en las fuentes.
-**Ya probada:** sí — NotebookLM se abstuvo correctamente y no inventó una cifra (ver Tratamiento C de Camilo).
+**Resultado:** NotebookLM se abstuvo y no inventó una cifra (utilizable).
 
 ### 16. Resultados de la competencia Kaggle
 **Pregunta:** ¿Qué equipo o modelo obtuvo el primer lugar en la competencia Kaggle RSNA 2024 Lumbar Spine Degenerative Classification, y qué puntaje logró?
-**Respuesta esperada del sistema:** Debe abstenerse — ninguno de los 9 documentos del corpus reporta resultados de la tabla de posiciones (leaderboard) de la competencia.
-**Por probar.**
+**Respuesta esperada del sistema:** Debe abstenerse — ninguno de los 10 documentos del corpus reporta resultados de la tabla de posiciones (leaderboard) de la competencia.
+**Resultado:** NotebookLM se abstuvo (utilizable).
 
 ### 17. Guía NASS
 **Pregunta:** Según la guía clínica de la North American Spine Society (NASS) de 2013, ¿cuál es el tratamiento de primera línea recomendado para estenosis lumbar leve?
 **Respuesta esperada del sistema:** Debe abstenerse o aclarar que solo tiene menciones indirectas de NASS citadas dentro de Bagley et al., no el documento original de la guía.
-**Por probar.** (Riesgo de "casi acierto": el sistema podría mezclar lo poco que Bagley menciona sobre NASS con conocimiento externo — vale la pena observar con cuidado.)
+**Resultado:** no utilizable. NotebookLM presentó los AINEs como tratamiento de primera línea citando a Bagley et al. sin aclarar que no tiene el texto de la guía. Es el riesgo de "casi acierto" que se había previsto.
 
 ### 18. Costos de la cirugía en el sistema de salud colombiano
 **Pregunta:** ¿Cuál es el costo promedio de una cirugía de descompresión lumbar en el sistema de salud colombiano, según estos documentos?
 **Respuesta esperada del sistema:** Debe abstenerse — ningún documento del corpus trata costos ni el sistema de salud colombiano (Bagley menciona costos en EE.UU., no en Colombia).
-**Por probar.** (Pregunta trampa: si el sistema mezcla la cifra de EE.UU. de Bagley con "Colombia", sería un fallo de contaminación cruzada entre fuentes.)
+**Resultado:** NotebookLM se abstuvo y distinguió los datos de EE.UU. de lo que se preguntaba sobre Colombia (utilizable). No hubo contaminación cruzada entre fuentes.
 
 ---
 
 ## Resumen
 
-- **14 preguntas con respuesta verificable**, todas con documento y ubicación exacta ya confirmados por el equipo antes de esta evaluación.
-- **4 preguntas sin respuesta en el corpus**, una ya probada (abstención correcta), tres pendientes — dos de ellas (17 y 18) diseñadas como "preguntas trampa" que podrían inducir al sistema a mezclar información de fuentes reales de forma incorrecta, en vez de simplemente inventar de la nada.
+- **14 preguntas con respuesta en el corpus**, con la fuente indicada para cada una. Las páginas exactas de las preguntas 2 y 3 están pendientes.
+- **4 preguntas de abstención** (15 a 18), las cuatro probadas. Resultado: 3 utilizables y 1 no utilizable (la 17).
+- **Total de NotebookLM: 17 de 18.** Detalle, clasificaciones y control en `RESULTADOS_banco_preguntas.md`.
