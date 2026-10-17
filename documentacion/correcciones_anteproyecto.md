@@ -1,8 +1,9 @@
 # Correcciones al anteproyecto — listas para pegar
 
 Cada bloque tiene el texto ORIGINAL (lo que dice la diapositiva ahora) y el CORREGIDO
-(lo que debería decir), con la razón del cambio. La diapositiva 7.2 (Abdelrahman)
-queda pendiente a propósito — el equipo decidió no resolverla todavía.
+(lo que debería decir), con la razón del cambio.
+
+> **Revisión del 17 de octubre de 2026:** se corrigió la diapositiva 7 (el preprint *sí* menciona el desbalance de datos), se propone una corrección para la segunda referencia de la diapositiva 7 (Trento / Abdelrahman), que antes estaba pendiente, y se actualizó la bibliografía. Detalle y páginas en `TRAZABILIDAD_estado_del_arte.md`.
 
 ---
 
@@ -45,22 +46,37 @@ ahora tenemos verificada contra el paper de Richards et al.
 
 **CORREGIDO:**
 > "Explica que la exactitud de clasificación convencional es insuficiente para
-> evaluar el comportamiento clínico de los modelos, dado que hay múltiples
-> condiciones, niveles vertebrales y categorías de severidad ordenadas en juego.
-> Propone un framework de cinco pipelines de Vision Transformers (deep learning),
-> complementado con métricas de exactitud ordinal (CLOA, PLOA) para evaluar el perfil
-> completo de degeneración de cada paciente."
+> evaluar estas condiciones, por el fuerte desbalance de clases y por la presencia de
+> múltiples condiciones, niveles vertebrales y categorías de severidad ordenadas.
+> Propone cinco pipelines de Vision Transformers (deep learning), complementados con
+> métricas de exactitud ordinal (OA, CLOA, PLOA), para evaluar el perfil completo de
+> degeneración de cada paciente."
 
 **Razón:** el método real es deep learning (Vision Transformers), no "modelos
-estadísticos", y la motivación real es la complejidad multi-nivel, no "desbalance de
-datos". Verificado línea por línea contra el PDF completo.
+estadísticos". El desbalance de datos **sí** lo menciona el preprint (Trînc et al.,
+2026, pp. 4, 9, 10 y 31; página del PDF o impresa por confirmar), y la versión
+anterior de este bloque, que lo eliminaba, era errónea. La complejidad multi-nivel es
+un motivo adicional, no el único.
 
 ### Sobre la segunda referencia (Trento / Abdelrahman)
 
-**PENDIENTE — no modificar todavía.** El equipo decidió posponer la resolución de
-cuál es la fuente correcta de esta frase (Trento et al. 2025 vs. Abdelrahman et al.
-2026). Ver Hallazgo 1 del inventario de fallos para el detalle completo cuando se
-retome.
+**ORIGINAL:**
+> "Explica cómo los modelos de IA están transformando el diagnóstico y pronóstico de
+> la estenosis espinal y hernias discales, siendo herramientas útiles para agilizar el
+> flujo de trabajo y la planificación médica"
+> (cita: Abdelrahman et al. (2026), *J. Software Engineering and Applications*)
+
+**PROPUESTA (a decidir por el equipo):** la frase mezcla dos fuentes, así que hay dos
+opciones: citar las dos, o dividir la frase.
+> "Explican cómo la IA puede apoyar el diagnóstico y pronóstico de la estenosis
+> espinal y las hernias discales y la planificación preoperatoria (Trento et al.,
+> 2025), y mejorar los flujos de trabajo de imagen (Abdelrahman et al., 2026)."
+
+**Razón:** "diagnosis and prognosis of lumbar disc herniation and spinal stenosis"
+está en Trento et al. (pp. 1–2) y "prognosis" no aparece en Abdelrahman; "workflow"
+está en Abdelrahman (p. 2 del PDF) y no aparece en Trento. Además, Abdelrahman **sí
+existe** (DOI 10.66279/r8h6j935); lo que estaba mal era el nombre de la revista (es
+*Journal of Smart Algorithms and Applications*) y el PDF guardado, que era el de Trento.
 
 ---
 
@@ -86,8 +102,9 @@ etapas que reporta Macro F1=0.783, kappa=0.765, AUC=0.891).
 
 ## Bibliografía completa corregida (reemplazar la diapositiva 17-19 completa)
 
-Usar la exportación de Zotero en formato APA 7. Referencias ya confirmadas con DOI
-real:
+Cuando la bibliografía esté en Zotero, exportarla en formato APA 7. Referencias con
+DOI localizado (la lista de autores de Cai y de Richards, que aquí aparece con
+"et al.", debe completarse en Zotero, porque APA 7 pide listar los autores):
 
 > Al-Tameemi, H. N., Al-Essawi, S., Shukri, M., & Naji, F. K. (2017). Using Magnetic
 > Resonance Myelography to Improve Interobserver Agreement in the Evaluation of
@@ -126,14 +143,16 @@ real:
 > Trînc, E. C., Ancuți, C., Ancuți, C., & Iacob, E. R. (2026). Beyond Accuracy:
 > Multi-Level Ordinal Assessment of Lumbar Spine Degeneration from Multiplanar MRI
 > Using the RSNA 2024 (LumbarDISC) Dataset and Condition-Specific ViTs. *Computer
-> Science and Mathematics*. https://doi.org/10.20944/preprints202608.1250.v1
+> *Preprints.org*. https://doi.org/10.20944/preprints202608.1250.v1
 >
 > Walsh, P. J., Lee, U. J., Lipetz, J. S., & Walz, D. M. (2026). Improving
 > Reliability of MRI Lumbar Spinal Stenosis Assessment Across Radiology and Spine
 > Specialties: Impact of a Structured Education Intervention. *Academic Radiology*.
+> (Solo se leyó el resumen; no está en el corpus.)
 
-**Pendiente:** Abdelrahman et al. — se agrega cuando el equipo decida cómo
-resolverlo (ver nota de la diapositiva 7 arriba).
+**Agregar:** Abdelrahman et al. (2026) — autores Abdelrahman, Abd El Basset y Elngar;
+*Journal of Smart Algorithms and Applications*; https://doi.org/10.66279/r8h6j935.
+[PENDIENTE: iniciales y título exacto, tomarlos del PDF o de la página del DOI.]
 
 **Nota:** Furman (2024), *Spinal Stenosis*, Medscape, queda fuera de esta lista
 corregida — es fuente terciaria sin DOI y con barrera de acceso; el equipo debe
