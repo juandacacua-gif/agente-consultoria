@@ -154,6 +154,7 @@ DOI localizado (la lista de autores de Cai y de Richards, que aquí aparece con
 *Journal of Smart Algorithms and Applications*; https://doi.org/10.66279/r8h6j935.
 [PENDIENTE: iniciales y título exacto, tomarlos del PDF o de la página del DOI.]
 
-**Nota:** Furman (2024), *Spinal Stenosis*, Medscape, queda fuera de esta lista
-corregida — es fuente terciaria sin DOI y con barrera de acceso; el equipo debe
-decidir si la retira definitivamente o la reemplaza.
+**Decisión del 17-oct-2026:** Furman (2024), *Spinal Stenosis*, Medscape, se retira de la bibliografía. Queda fuera de esta lista
+corregida porque es fuente terciaria sin DOI y con barrera de acceso.
+
+**Consecuencia para la diapositiva 7:** la frase "Este artículo muestra como algunas patologías pueden tener una misma causa de origen y relacionarse" (que citaba a Furman) queda sin respaldo. [PENDIENTE: decidir si se elimina de la diapositiva o se reemplaza por una fuente primaria que sí diga eso, verificada contra el PDF.]

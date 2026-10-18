@@ -110,13 +110,13 @@ Convención de estado:
 - **Acción pendiente:** la cita ya está corregida en `correcciones_anteproyecto.md`. Conseguir el PDF vía biblioteca institucional de la Universidad Santo Tomás para anotar la página (fila 8.3). Prueba con NotebookLM (17-oct-2026): se abstuvo correctamente al preguntarle por Walsh (`entregables/caso_fallo_walsh_2026-10-17.md`).
 - **Verificado por:** Búsqueda dirigida, 22-sep-2026.
 
-## 10. Furman (2024) — fuente terciaria con barrera de acceso
+## 10. Furman (2024) — RETIRADA de la bibliografía (17-oct-2026)
 
 - **Título:** Spinal Stenosis.
 - **Fuente:** Medscape.
 - **Archivo local:** _no disponible_ (no está en el corpus)
 - **Estado:** Medscape es una fuente terciaria (artículo de referencia clínica, no un estudio con hallazgos originales) y pide cuenta gratuita para ver el texto completo.
-- **Acción pendiente:** decidir en equipo si se mantiene como fuente del estado del arte o se sustituye por una fuente primaria equivalente.
+- **Decisión del equipo (17-oct-2026):** se retira de la bibliografía. La frase de la diapositiva 7 que la citaba queda sin respaldo y debe eliminarse o reemplazarse por una fuente primaria (ver fila 7.3 de `TRAZABILIDAD_estado_del_arte.md`).
 
 ## 11. Abdelrahman et al. (2026) — existe
 
@@ -140,8 +140,8 @@ Convención de estado:
 | ✅ Verificada y con PDF en el corpus | 9 | 1, 2, 3, 4, 5, 6, 7, 8, 11 |
 | Ficha por completar | 1 | 12 (Zhao et al.) |
 | ✅ Existe, sin PDF en el corpus | 1 | 9 (Walsh; cita corregida, falta el PDF) |
-| Fuente terciaria / barrera de acceso | 1 | 10 (Furman; sin PDF) |
+| Retirada de la bibliografía | 1 | 10 (Furman; fuente terciaria con barrera de acceso) |
 
-Nota: el corpus tiene 10 documentos (referencias 1 a 8, 11 y 12). Walsh y Furman no están en el corpus.
+Nota: el corpus tiene 10 documentos (referencias 1 a 8, 11 y 12). Walsh no está en el corpus y Furman se retiró.
 
-**Pendientes:** nombres de archivo y fechas de descarga; ficha de Zhao et al.; decidir el destino de Furman; páginas de la trazabilidad (7.3, 8.1, 8.3, 9.1).
+**Pendientes:** nombres de archivo y fechas de descarga; ficha de Zhao et al.; decidir qué se hace con la frase de la diapositiva 7 que citaba a Furman; página de la trazabilidad 8.3 (Walsh).

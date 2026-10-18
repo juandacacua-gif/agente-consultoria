@@ -42,9 +42,9 @@ principalmente por su capacidad de citar con localización exacta dentro del doc
 10 documentos verificados con procedencia documentada (`documentacion/PROCEDENCIA.md`):
 Richards et al. (LumbarDISC), Cai/Xin Yi et al. (biomecánica L4-L5), Trento et al.,
 Beyond Accuracy (preprint), Al-Tameemi et al., Bagley et al., Miskin et al., Abdelrahman
-et al., Chai et al. y Zhao et al. Todos de acceso abierto salvo dos referencias descartadas o
-pendientes de resolución (Furman/Medscape, fuente terciaria; Walsh et al., con acceso
-institucional). Durante la auditoría del corpus se identificaron y corrigieron 4 fallos
+et al., Chai et al. y Zhao et al. Todos de acceso abierto salvo dos referencias que quedaron
+fuera del corpus (Furman/Medscape, fuente terciaria, retirada de la bibliografía el
+17-oct-2026; y Walsh et al., con acceso institucional). Durante la auditoría del corpus se identificaron y corrigieron 4 fallos
 de citación en la bibliografía original del anteproyecto (documentados en
 `documentacion/INVENTARIO_DE_FALLOS_consolidado.md`).
 
