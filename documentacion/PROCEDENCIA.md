@@ -116,7 +116,7 @@ Convención de estado:
 - **Fuente:** Medscape.
 - **Archivo local:** _no disponible_ (no está en el corpus)
 - **Estado:** Medscape es una fuente terciaria (artículo de referencia clínica, no un estudio con hallazgos originales) y pide cuenta gratuita para ver el texto completo.
-- **Decisión del equipo (17-oct-2026):** se retira de la bibliografía. La frase de la diapositiva 7 que la citaba queda sin respaldo y debe eliminarse o reemplazarse por una fuente primaria (ver fila 7.3 de `TRAZABILIDAD_estado_del_arte.md`).
+- **Decisión del equipo (17-oct-2026):** se retira de la bibliografía. La frase de la diapositiva 7 que la citaba se elimina (ver fila 7.3 de `TRAZABILIDAD_estado_del_arte.md`).
 
 ## 11. Abdelrahman et al. (2026) — existe
 
@@ -144,4 +144,4 @@ Convención de estado:
 
 Nota: el corpus tiene 10 documentos (referencias 1 a 8, 11 y 12). Walsh no está en el corpus y Furman se retiró.
 
-**Pendientes:** nombres de archivo y fechas de descarga; ficha de Zhao et al.; decidir qué se hace con la frase de la diapositiva 7 que citaba a Furman; página de la trazabilidad 8.3 (Walsh).
+**Pendientes:** nombres de archivo y fechas de descarga; ficha de Zhao et al.; página de la trazabilidad 8.3 (Walsh).

@@ -157,4 +157,4 @@ DOI localizado (la lista de autores de Cai y de Richards, que aquí aparece con
 **Decisión del 17-oct-2026:** Furman (2024), *Spinal Stenosis*, Medscape, se retira de la bibliografía. Queda fuera de esta lista
 corregida porque es fuente terciaria sin DOI y con barrera de acceso.
 
-**Consecuencia para la diapositiva 7:** la frase "Este artículo muestra como algunas patologías pueden tener una misma causa de origen y relacionarse" (que citaba a Furman) queda sin respaldo. [PENDIENTE: decidir si se elimina de la diapositiva o se reemplaza por una fuente primaria que sí diga eso, verificada contra el PDF.]
+**Consecuencia para la diapositiva 7:** la frase "Este artículo muestra como algunas patologías pueden tener una misma causa de origen y relacionarse" (que citaba a Furman) queda sin respaldo. **Decisión del equipo (17-oct-2026): se elimina de la diapositiva.** Si más adelante se quiere recuperar la idea, hay que usar una fuente primaria verificada contra su PDF.
