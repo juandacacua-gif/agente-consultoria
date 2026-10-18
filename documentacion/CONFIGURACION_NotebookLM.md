@@ -14,7 +14,7 @@ Esta hoja describe con qué se ejecutó el banco de 18 preguntas, para que se pu
 
 ## 2. Documentos cargados durante la ejecución
 
-Total: 10 fuentes. Captura de la lista: `documentacion/captura_notebooklm_fuentes_2026-10-17.png`.
+Total: 10 fuentes (confirmado por Camilo el 17-oct-2026). Captura de la lista: `documentacion/captura_notebooklm_fuentes_2026-10-17.png`.
 
 | # | Fuente | Observación |
 |---|---|---|
@@ -53,8 +53,8 @@ Total: 10 fuentes. Captura de la lista: `documentacion/captura_notebooklm_fuente
 
 **Diferencias con el protocolo v1.0 (importante):**
 * El texto configurado **no es el protocolo v1.0**: no contiene el rol de consultor bioestadístico, ni el formato de cita `[Autor, Año] + (Documento, Página)`, ni la frase fija de abstención. Pide citas `[i]` (numeradas) y que se declare cuando un dato no está.
-* Dice **11 documentos**, pero el corpus evaluado es de **10**. [PENDIENTE: confirmar con la captura si hay una fuente de más o si el texto quedó desactualizado.]
-* Por eso las respuestas del banco no se deben presentar como "protocolo v1.0 aplicado". Se aplicó esta configuración. [PENDIENTE: confirmar si el texto del protocolo v1.0 también se pegó dentro de las preguntas; si no se hizo, el protocolo v1.0 no se ejecutó.]
+* Dice **11 documentos**, pero el corpus evaluado es de **10**. Camilo confirmó (17-oct-2026) que el notebook tiene 10 fuentes y que no se agregó nada fuera de los 10 documentos de `fuentes/`. El "11" del texto de instrucciones está desactualizado.
+* **Cómo se hicieron las preguntas:** Camilo tomó cada una de las 18 del banco de preguntas y la pegó sola en el chat de NotebookLM, sin el texto del protocolo v1.0. Por lo tanto **el protocolo v1.0 no se ejecutó**: se aplicó solo la configuración del chat de arriba. Las respuestas del banco no se deben presentar como "protocolo v1.0 aplicado", y el protocolo v1.1 describe este procedimiento real.
 
 ## 5. Control
 

@@ -44,6 +44,8 @@ Por eso, para este protocolo se evalúa la **conducta** (no inventar y decir que
 
 ## 6. Procedimiento por sesión
 
+> Así se hizo realmente el 17-oct-2026: cada pregunta del banco se pegó sola en el chat, sin el texto del protocolo v1.0; solo estaba activa la configuración del chat (ver `CONFIGURACION_NotebookLM.md`). Por eso la v1.0 no se ejecutó como tal.
+
 1. Abrir el notebook y capturar la lista de fuentes cargadas, con fecha.
 2. Hacer cada pregunta tal como está en `documentacion/banco_preguntas.md`, sin cambiar el texto.
 3. Copiar la respuesta literal y el pasaje que enlaza la cita.
