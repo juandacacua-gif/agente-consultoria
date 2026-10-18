@@ -9,7 +9,6 @@
 # install.packages(c("tidyverse", "cluster", "factoextra", "FactoMineR", "vcd", "MASS", "ordinal"))
 
 library(tidyverse)   # Manipulación de datos y visualización (dplyr, ggplot2, readr)
-library(cluster)     # Algoritmo K-Medoides (PAM) y matriz de distancia de Gower
 library(factoextra)  # Visualizaciones elegantes para Clustering y MCA
 library(FactoMineR)  # Análisis de Correspondencias Múltiples (MCA)
 library(vcd)         # Pruebas estadísticas para datos categóricos
@@ -31,7 +30,7 @@ niveles_severidad <- c("Normal/Mild", "Moderate", "Severe")
 
 # Convertir todas las columnas categóricas a factores ordenados (excluyendo study_id)
 df_analisis <- df %>%
-  select(-study_id) %>%
+  dplyr::select(-study_id) %>%
   mutate(across(everything(), ~ factor(.x, levels = niveles_severidad, ordered = TRUE)))
 
 cat("
