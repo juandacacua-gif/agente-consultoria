@@ -37,7 +37,7 @@ Justificaciones escritas por Camilo Velandia.
 | 3 | Utilizable | Identifica a la Fundación Santa Fe de Bogotá y a la Dra. Angela Guarnizo Capera. |
 | 4 | Utilizable | Coincide exactamente: el kappa pasa de 0,40 con RM convencional a 0,60 con MRM, una mejora de 0,20. |
 | 5 | Utilizable | Coincide con lo esperado: el acuerdo no mejoró; pasó de kappa 0,38 a 0,33 para estenosis del canal. |
-| 6 | Utilizable | Da 30 pacientes (18 mujeres y 12 hombres, 25 a 65 años) y 150 niveles de disco. Los datos de sexo y edad figuran en el texto completo de Al-Tameemi et al. (2017); no son inventados. [PENDIENTE: página.] |
+| 6 | Utilizable | Da 30 pacientes (18 mujeres y 12 hombres, 25 a 65 años) y 150 niveles de disco. Los datos de sexo y edad figuran en el texto completo de Al-Tameemi et al. (2017), p. 199 (p. 2 del PDF); no son inventados. |
 | 7 | Utilizable | Identifica ViT-L/16 y la precisión máxima de validación de 92,41 %. |
 | 8 | Utilizable | Explica la CLOA (crédito completo a aciertos exactos, parcial a errores adyacentes y cero a diferencias de dos grados) y reporta 95,79 % para SCS. |
 | 9 | Utilizable | Identifica la edad como factor más importante, además de obesidad, tabaquismo y factores genéticos. |
@@ -77,4 +77,4 @@ El caso de fallo sigue siendo el de la semana 2: NotebookLM citó kappas de Misk
 - El control usó búsqueda web y las preguntas 15 a 18 no son comparables.
 - Con 18 preguntas los intervalos son muy anchos.
 - Falta registrar, por pregunta, el pasaje citado por NotebookLM y la fecha de ejecución.
-- Falta confirmar si las páginas de la pregunta 14 son del PDF o impresas, verificar la sensibilidad, especificidad y AUC agregados, y la página de la pregunta 6.
+- Falta confirmar si las páginas de la pregunta 14 son del PDF o impresas, y verificar la sensibilidad, especificidad y AUC agregados que citó NotebookLM.
