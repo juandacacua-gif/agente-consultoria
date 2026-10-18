@@ -15,10 +15,12 @@
 | Punto | v1.0 | v1.1 (NotebookLM) |
 |---|---|---|
 | Corpus autorizado | PDF locales + dataset de Kaggle | Solo los 10 PDF cargados en el notebook; no hay dataset tabular |
-| Dónde viven las instrucciones | Prompt de sistema del agente | [PENDIENTE: indicar dónde se pegaron en NotebookLM (por ejemplo, la configuración personalizada del chat o el primer mensaje) y copiar el texto exacto usado] |
+| Dónde viven las instrucciones | Prompt de sistema del agente | Configuración del chat del notebook. El texto realmente configurado (copiado en `CONFIGURACION_NotebookLM.md`, sección 4) **no coincide con v1.0**: no tiene el rol, ni el formato de cita con página, ni la frase fija de abstención |
 | Registro de fuentes cargadas | No exigido | Obligatorio: guardar captura de la lista de fuentes antes de cada sesión (caso Miskin: el PDF se cargó un día después de la consulta) |
 | Citas | `[Autor, Año] + (Documento, Página)` | Igual, pero NotebookLM entrega citas numeradas que enlazan al pasaje; se registra el pasaje citado en `pasaje_citado` |
 | Abstención | Frase fija | Frase fija, pero **no se cumplió de forma literal** (ver sección 5) |
+
+> **Aviso:** las secciones 3 a 5 son el texto de v1.0, que es el protocolo **propuesto**. Lo que se configuró en NotebookLM durante el banco fue otro texto más corto (ver `CONFIGURACION_NotebookLM.md`). Hasta confirmar si v1.0 se pegó dentro de las preguntas, no se debe decir que el banco se ejecutó con v1.0.
 
 ## 3. Rol y restricciones (texto de v1.0, sin cambios)
 

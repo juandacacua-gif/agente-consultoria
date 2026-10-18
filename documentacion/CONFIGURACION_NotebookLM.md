@@ -7,9 +7,9 @@ Esta hoja describe con qué se ejecutó el banco de 18 preguntas, para que se pu
 
 ## 1. Cuenta y entorno
 
-* **Cuenta de Google usada:** [PENDIENTE: cuenta (correo) con la que se creó el notebook].
-* **Plan de NotebookLM:** [PENDIENTE: gratuito o de pago].
-* **Nombre del notebook:** [PENDIENTE].
+* **Cuenta de Google usada:** cuenta personal.
+* **Plan de NotebookLM:** gratuito.
+* **Nombre del notebook:** "MRM Enhanced Evaluation of Lumbar Stenosis and Root Compression" (parece el título del primer documento cargado, Al-Tameemi et al., y no un nombre elegido para este proyecto).
 * **Quién ejecutó las 18 preguntas y cuándo:** Camilo Velandia, 17 de octubre de 2026 (las respuestas literales están en `entregables/respuestas_notebooklm_2026-10-17.pdf`). [PENDIENTE: hora o confirmar que todas fueron el mismo día].
 
 ## 2. Documentos cargados durante la ejecución
@@ -40,8 +40,21 @@ Total: 10 fuentes. Captura de la lista: `documentacion/captura_notebooklm_fuente
 
 ## 4. Dónde van las instrucciones
 
-* NotebookLM no tiene un "prompt de sistema" como un agente propio. Las instrucciones del protocolo v1.1 (`documentacion/PROTOCOLO_v1.1_NotebookLM.md`) se aplican por [PENDIENTE: indicar si se pegaron en la configuración del chat del notebook o al inicio de cada conversación].
-* **Texto exacto usado:** [PENDIENTE: pegar aquí el texto tal como se escribió].
+* Las instrucciones están en la **configuración del chat del notebook**. Texto exacto, copiado tal cual por Camilo el 17-oct-2026:
+
+> La configuración del chat en Gemini Notebook opera bajo los siguientes parámetros y principios fundamentales:
+> Idioma y estilo de respuesta: Responde en el mismo idioma en el que realizas la consulta (en este caso, español de América Latina) con un formato estructurado, claro y sin textos de relleno.
+> Anclaje estricto en fuentes (Source Grounding): Todas las explicaciones y afirmaciones sobre el tema de estudio se fundamentan exclusivamente en los 11 documentos cargados en este cuaderno, acreditando la información mediante citas explícitas [i].
+> Veracidad y no extrapolación: Si un dato o cifra específica no está presente en los documentos cargados, el sistema lo declara de forma transparente en lugar de complementar con información externa no verificable.
+> Capacidades integradas:
+> Búsqueda semántica cruzada: Localización precisa de pasajes y tablas tanto en texto como en representaciones visuales dentro del cuaderno.
+> Creación de artefactos (Content Studio): Capacidad para estructurar e independizar entregables como reportes detallados, presentaciones de diapositivas, infografías, mapas mentales, pódcasts de audio o guías de estudio.
+> Análisis y computación cuantitativa: Entorno de ejecución para procesamiento de datos o generación de gráficos de alta precisión cuando se requiera.
+
+**Diferencias con el protocolo v1.0 (importante):**
+* El texto configurado **no es el protocolo v1.0**: no contiene el rol de consultor bioestadístico, ni el formato de cita `[Autor, Año] + (Documento, Página)`, ni la frase fija de abstención. Pide citas `[i]` (numeradas) y que se declare cuando un dato no está.
+* Dice **11 documentos**, pero el corpus evaluado es de **10**. [PENDIENTE: confirmar con la captura si hay una fuente de más o si el texto quedó desactualizado.]
+* Por eso las respuestas del banco no se deben presentar como "protocolo v1.0 aplicado". Se aplicó esta configuración. [PENDIENTE: confirmar si el texto del protocolo v1.0 también se pegó dentro de las preguntas; si no se hizo, el protocolo v1.0 no se ejecutó.]
 
 ## 5. Control
 
