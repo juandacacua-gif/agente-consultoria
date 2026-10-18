@@ -45,7 +45,7 @@ Justificaciones escritas por Camilo Velandia.
 | 11 | Utilizable | M-SCAN es un marco multietapa de Batra et al. que integra vistas sagital y axial con atención cruzada; AUROC de 0,971 sobre 1.975 estudios. |
 | 12 | Utilizable | Identifica un estudio de elementos finitos tridimensional que evalúa el efecto biomecánico de la degeneración de L4-L5 sobre la columna lumbar inferior y los segmentos adyacentes. |
 | 13 | Utilizable | Reporta los cuatro kappas esperados: 0,702 (canal), 0,544 (foraminal), 0,557 (artropatía facetaria) y 0,323 (receso lateral). |
-| 14 | Utilizable | [PENDIENTE: justificación escrita.] Ver caso discutido más abajo. |
+| 14 | Utilizable | Da lo esperado: los cuatro paradigmas (híbridos característica-clasificador, cascadas multietapa, fusión cross-modal y ensambles de consenso), Dice superior a 0,90 y AUC de hasta ~0,98, que figuran en el resumen de Abdelrahman et al. (p. 1). Añade cifras que también están en el artículo (ver caso discutido): se acepta como utilizable con la reserva de que la cifra de 99,42 % es de un estudio puntual. |
 | 15 | Utilizable | Se abstiene de dar una prevalencia de espondilolistesis degenerativa en Colombia y aclara que las fuentes no contienen datos epidemiológicos de esa población. |
 | 16 | Utilizable | Reconoce que las fuentes no identifican al equipo ganador ni su puntaje en el leaderboard de Kaggle RSNA 2024, y distingue eso de los datos que sí reportan. |
 | 17 | **No utilizable** | Se basa en menciones indirectas de la guía NASS 2013 a través de Bagley et al., pero no aclara que no dispone del texto completo de la guía. Presenta los AINEs como tratamiento farmacológico de primera línea sin advertir esa limitación documental, por lo que no cumple el criterio de abstención esperado. |
@@ -54,7 +54,13 @@ Justificaciones escritas por Camilo Velandia.
 ## 4. Casos discutidos
 
 - **Pregunta 17.** Es la única respuesta no utilizable. La versión anterior de este archivo la daba como abstención correcta, y decía que el sistema había aclarado que no tenía el texto íntegro de la guía. Esa aclaración no aparece en la respuesta literal; se corrige.
-- **Pregunta 14.** Se clasificó como utilizable porque la respuesta da lo esperado (paradigmas de IA, Dice mayor a 0,90 y AUC de hasta 0,98). La auditoría la había señalado porque la respuesta añade rangos de exactitud de fuentes distintas. La versión anterior decía que el rango de 71,5 % a 99,42 % era "consistente con el documento". Lo verificado es otra cosa: en Abdelrahman et al. (p. 8 del PDF), "71,5 % a 99 %" es el rango de exactitud diagnóstica de **otra revisión** (Liawrungrueang et al.), no un resultado propio de Abdelrahman. La cifra de 99,42 % no se localizó en el PDF. [PENDIENTE: justificación escrita, página y origen de 99,42 %.]
+- **Pregunta 14.** Se clasificó como utilizable porque la respuesta da lo esperado (paradigmas de IA, Dice mayor a 0,90 y AUC de hasta 0,98; resumen de Abdelrahman et al., p. 1). La auditoría la había señalado por las cifras adicionales. Se verificaron en el PDF de Abdelrahman et al. (páginas tal como las anotó Camilo; [PENDIENTE: confirmar si son del PDF o impresas]):
+  - **Dice 0,900 e IoU 0,863:** pp. 8 y 9. Son el resultado agregado del metaanálisis de Wang et al. [33], que Abdelrahman et al. reseñan.
+  - **AUC 0,983 (estenosis central) y 0,961 (foraminal):** p. 15, tabla (referencia [60]). El nombre "Deep Spine (Lu et al.)" que usó NotebookLM no aparece en el fragmento revisado; no se verificó.
+  - **Rango "78 %–80 %":** p. 15, tabla (referencia [60]): exactitud promedio por clase de 80,4 % (estenosis central) y 78,1 % (foraminal).
+  - **"98,0 % a 99,42 %":** p. 19, tabla ([73] con 98 % y [74] con 99,42 %). Son exactitudes de **estudios individuales de clasificación de hernia discal**; el de 99,42 % es de clasificación binaria, con un solo conjunto de datos público y sin validación externa, según la propia tabla. NotebookLM los presentó como el techo de "modelos híbridos optimizados y sistemas de ensamble de consenso", lo que generaliza dos resultados puntuales.
+  - **Sensibilidad 0,84, especificidad 0,87 y AUC 0,92 agregados:** no se verificaron.
+  Por eso la clasificación se mantiene (el contenido esperado está y las cifras existen en el artículo), pero con la reserva de que la respuesta pierde el contexto de esas cifras.
 - **Pregunta 6.** La versión inicial del banco esperaba "30 resonancias" porque el resumen de Al-Tameemi dice "30 lumbar spinal MRI". El texto completo dice "30 patients (18 females and 12 males, aged 25–65 years)", así que la respuesta de NotebookLM es correcta y la respuesta esperada se corrigió.
 
 ## 5. Prueba con una fuente fuera del corpus (Walsh et al., 2026)
@@ -71,4 +77,4 @@ El caso de fallo sigue siendo el de la semana 2: NotebookLM citó kappas de Misk
 - El control usó búsqueda web y las preguntas 15 a 18 no son comparables.
 - Con 18 preguntas los intervalos son muy anchos.
 - Falta registrar, por pregunta, el pasaje citado por NotebookLM y la fecha de ejecución.
-- Falta la justificación escrita de la pregunta 14 y las páginas de las preguntas 6 y 14.
+- Falta confirmar si las páginas de la pregunta 14 son del PDF o impresas, verificar la sensibilidad, especificidad y AUC agregados, y la página de la pregunta 6.
