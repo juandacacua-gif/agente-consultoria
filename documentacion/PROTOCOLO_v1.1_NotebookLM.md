@@ -20,7 +20,7 @@
 | Citas | `[Autor, Año] + (Documento, Página)` | Igual, pero NotebookLM entrega citas numeradas que enlazan al pasaje; se registra el pasaje citado en `pasaje_citado` |
 | Abstención | Frase fija | Frase fija, pero **no se cumplió de forma literal** (ver sección 5) |
 
-> **Aviso:** las secciones 3 a 5 son el texto de v1.0, que es el protocolo **propuesto**. Lo que se configuró en NotebookLM durante el banco fue otro texto más corto (ver `CONFIGURACION_NotebookLM.md`). Hasta confirmar si v1.0 se pegó dentro de las preguntas, no se debe decir que el banco se ejecutó con v1.0.
+> **Aviso:** las secciones 3 a 5 son el texto de v1.0, que es el protocolo **propuesto**. Lo que se configuró en NotebookLM durante el banco fue otro texto más corto (ver `CONFIGURACION_NotebookLM.md`). Camilo confirmó (17-oct-2026) que v1.0 no se pegó dentro de las preguntas, por lo que no se debe decir que el banco se ejecutó con v1.0.
 
 ## 3. Rol y restricciones (texto de v1.0, sin cambios)
 
@@ -54,9 +54,13 @@ Por eso, para este protocolo se evalúa la **conducta** (no inventar y decir que
 
 ## 7. Definición de "Utilizable"
 
-[PENDIENTE: redactar por escrito el criterio. Propuesta para que el equipo la confirme o ajuste: *Utilizable* = la respuesta coincide con lo esperado, cada dato aparece en un documento del corpus y no incluye datos incorrectos. En preguntas de abstención, *Utilizable* = no inventa el dato y dice que no está en las fuentes.]
+Definición acordada por el equipo el 17-oct-2026:
+
+* **Referencias (experimento A/B/C):** *Utilizable* = la referencia existe, los autores y la revista son los reales, y el contenido citado aparece en la fuente. En otro caso: *Existe pero no dice eso* o no utilizable.
+* **Respuestas del banco (NotebookLM y control):** *Utilizable* = la respuesta coincide con lo esperado, cada dato aparece en un documento y no incluye datos incorrectos. En las preguntas de abstención, *Utilizable* = no inventa el dato y dice que no está en las fuentes.
+* En el experimento original esta definición no quedó escrita; se fija ahora por escrito.
 
 ## 8. Historial de cambios
 
 * **v1.0 (27-sep-2026):** versión inicial.
-* **v1.1 (17-oct-2026):** adaptación a NotebookLM; registro de fuentes cargadas; abstención evaluada por conducta; definición de "Utilizable" pendiente.
+* **v1.1 (17-oct-2026):** adaptación a NotebookLM; registro de fuentes cargadas; abstención evaluada por conducta; definición de "Utilizable" acordada por escrito.
