@@ -41,32 +41,6 @@ summary(df_analisis)
 # ==============================================================================
 # 3. PRUEBA CHI-CUADRADA DE INDEPENDENCIA
 # ==============================================================================
-# Ejemplo: Evaluar la relación entre la estenosis del canal espinal en L4/L5 
-# y la estenosis subarticular izquierda en L4/L5
-
-# Usando $
-var1 <- df_analisis$spinal_canal_stenosis_l4_l5
-var2 <- df_analisis$left_subarticular_stenosis_l4_l5
-
-tabla_contingencia <- table(Canal_L4_L5 = var1, Subarticular_Izq_L4_L5 = var2)
-
-# Tabla de contingencia
-tabla_contingencia <- table(var1, var2)
-cat("
-=== Tabla de Contingencia (Canal L4/L5 vs Subarticular Izq L4/L5) ===
-")
-print(tabla_contingencia)
-
-# Prueba Chi-Cuadrada
-prueba_chisq <- chisq.test(tabla_contingencia)
-cat("
-=== Resultado Prueba Chi-Cuadrada ===
-")
-print(prueba_chisq)
-
-# Visualización de la asociación
-plot(tabla_contingencia, col = c("#6baed6", "#fd8d3c", "#e31a1c"),
-     main = "Relación entre Estenosis Canal L4/L5 y Subarticular Izq L4/L5")
 
 # Todas las tablas de contingencia para los gráficos (1-5 sub der, 6-10 sub izq, 11-15 foram der, 16-20 foram izq)
 
@@ -94,7 +68,7 @@ tabla18<-table(df_analisis$spinal_canal_stenosis_l3_l4, df_analisis$left_neural_
 tabla19<-table(df_analisis$spinal_canal_stenosis_l4_l5, df_analisis$left_neural_foraminal_narrowing_l4_l5)
 tabla20<-table(df_analisis$spinal_canal_stenosis_l5_s1, df_analisis$left_neural_foraminal_narrowing_l5_s1)
 
-# Pruebas x2
+# Pruebas chi-cuadrada
 
 chisq.test(tabla01)
 chisq.test(tabla02)
@@ -120,7 +94,7 @@ chisq.test(tabla18)
 chisq.test(tabla19)
 chisq.test(tabla20)
 
-# Gráficos
+# Gráficos de mosaico para la visualización de la asociación
 
 par(mfrow = c(2, 3))
 
@@ -195,25 +169,8 @@ par(mfrow = c(1, 1))
 # ==============================================================================
 # 4. PRUEBA DE MCNEMAR-BOWKER (Simetría de Homólogos Izquierda vs. Derecha)
 # ==============================================================================
-# Ejemplo: Evaluar si existe simetría o sesgo lateral entre el lado izquierdo 
-# y derecho en estrechamiento foraminal L4/L5
 
-izq <- df_analisis$left_subarticular_stenosis_l4_l5
-der <- df_analisis$right_subarticular_stenosis_l4_l5
-
-# La prueba de McNemar-Bowker requiere una tabla cuadrada (k x k)
-tabla_pareada <- table(Izquierda = izq, Derecha = der)
-cat("
-=== Tabla Pareada (Izquierda vs. Derecha L4/L5) ===
-")
-print(tabla_pareada)
-
-# En R base, mcnemar.test realiza la prueba de McNemar-Bowker para k x k
-prueba_mcnemar <- mcnemar.test(tabla_pareada)
-cat("
-=== Resultado Prueba McNemar-Bowker (Simetría) ===
-")
-print(prueba_mcnemar)
+# Tablas pareadas para comparar por lados
 
 homologo01 = table(Izquierda = df_analisis$left_subarticular_stenosis_l1_l2, Derecha = df_analisis$right_subarticular_stenosis_l1_l2)
 homologo02 = table(Izquierda = df_analisis$left_subarticular_stenosis_l2_l3, Derecha = df_analisis$right_subarticular_stenosis_l2_l3)
@@ -225,6 +182,8 @@ homologo07 = table(Izquierda = df_analisis$left_neural_foraminal_narrowing_l2_l3
 homologo08 = table(Izquierda = df_analisis$left_neural_foraminal_narrowing_l3_l4, Derecha = df_analisis$right_neural_foraminal_narrowing_l3_l4)
 homologo09 = table(Izquierda = df_analisis$left_neural_foraminal_narrowing_l4_l5, Derecha = df_analisis$right_neural_foraminal_narrowing_l4_l5)
 homologo10 = table(Izquierda = df_analisis$left_neural_foraminal_narrowing_l5_s1, Derecha = df_analisis$right_neural_foraminal_narrowing_l5_s1)
+
+# Resultados de la prueba de McNemar para cada homologo
 
 mcnemar.test(homologo01)
 mcnemar.test(homologo02)
@@ -271,7 +230,7 @@ print(p_mca_ind)
 
 df_ordinal <- df %>%
   dplyr::select(-study_id) %>%
-  mutate(across(everything(), ~ factor(.x, levels = niveles, ordered = TRUE)))
+  mutate(across(everything(), ~ factor(.x, levels = niveles_severidad, ordered = TRUE)))
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l1_l2 <- polr(
@@ -287,6 +246,7 @@ modelo_polr_l1_l2 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l1_l2)
 exp(cbind(OR = coef(modelo_polr_l1_l2), confint(modelo_polr_l1_l2)))
+DescTools::PseudoR2(modelo_polr_l1_l2, which = "all")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l2_l3 <- polr(
@@ -302,6 +262,7 @@ modelo_polr_l2_l3 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l2_l3)
 exp(cbind(OR = coef(modelo_polr_l2_l3), confint(modelo_polr_l2_l3)))
+DescTools::PseudoR2(modelo_polr_l2_l3, which = "all")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l3_l4 <- polr(
@@ -317,6 +278,7 @@ modelo_polr_l3_l4 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l3_l4)
 exp(cbind(OR = coef(modelo_polr_l3_l4), confint(modelo_polr_l3_l4)))
+DescTools::PseudoR2(modelo_polr_l3_l4, which = "all")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l4_l5 <- polr(
@@ -332,6 +294,7 @@ modelo_polr_l4_l5 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l4_l5)
 exp(cbind(OR = coef(modelo_polr_l4_l5), confint(modelo_polr_l4_l5)))
+DescTools::PseudoR2(modelo_polr_l4_l5, which = "all")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l5_s1 <- polr(
@@ -347,3 +310,4 @@ modelo_polr_l5_s1 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l5_s1)
 exp(cbind(OR = coef(modelo_polr_l5_s1), confint(modelo_polr_l5_s1)))
+DescTools::PseudoR2(modelo_polr_l5_s1, which = "all")
