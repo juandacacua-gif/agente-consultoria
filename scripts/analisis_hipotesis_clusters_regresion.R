@@ -6,7 +6,7 @@
 # 1. CARGA DE PAQUETES REQUERIDOS
 # ------------------------------------------------------------------------------
 # Si no tienes instalados los paquetes, ejecuta:
-# install.packages(c("tidyverse", "cluster", "factoextra", "FactoMineR", "vcd", "MASS", "ordinal"))
+# install.packages(c("tidyverse", "cluster", "factoextra", "FactoMineR", "vcd", "MASS", "ordinal", "performance"))
 
 library(tidyverse)   # Manipulación de datos y visualización (dplyr, ggplot2, readr)
 library(factoextra)  # Visualizaciones elegantes para Clustering y MCA
@@ -14,6 +14,7 @@ library(FactoMineR)  # Análisis de Correspondencias Múltiples (MCA)
 library(vcd)         # Pruebas estadísticas para datos categóricos
 library(MASS)
 library(ordinal)
+library(performance)
 
 # 2. CARGA Y PREPARACIÓN DE DATOS
 # ------------------------------------------------------------------------------
@@ -246,7 +247,7 @@ modelo_polr_l1_l2 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l1_l2)
 exp(cbind(OR = coef(modelo_polr_l1_l2), confint(modelo_polr_l1_l2)))
-DescTools::PseudoR2(modelo_polr_l1_l2, which = "all")
+r2(modelo_polr_l1_l2)
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l2_l3 <- polr(
@@ -262,7 +263,7 @@ modelo_polr_l2_l3 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l2_l3)
 exp(cbind(OR = coef(modelo_polr_l2_l3), confint(modelo_polr_l2_l3)))
-DescTools::PseudoR2(modelo_polr_l2_l3, which = "all")
+r2(modelo_polr_l2_l3)
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l3_l4 <- polr(
@@ -278,7 +279,7 @@ modelo_polr_l3_l4 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l3_l4)
 exp(cbind(OR = coef(modelo_polr_l3_l4), confint(modelo_polr_l3_l4)))
-DescTools::PseudoR2(modelo_polr_l3_l4, which = "all")
+r2(modelo_polr_l3_l4)
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l4_l5 <- polr(
@@ -294,7 +295,7 @@ modelo_polr_l4_l5 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l4_l5)
 exp(cbind(OR = coef(modelo_polr_l4_l5), confint(modelo_polr_l4_l5)))
-DescTools::PseudoR2(modelo_polr_l4_l5, which = "all")
+r2(modelo_polr_l4_l5)
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l5_s1 <- polr(
@@ -310,4 +311,4 @@ modelo_polr_l5_s1 <- polr(
 # Resumen del modelo y Odds Ratios (OR)
 summary(modelo_polr_l5_s1)
 exp(cbind(OR = coef(modelo_polr_l5_s1), confint(modelo_polr_l5_s1)))
-DescTools::PseudoR2(modelo_polr_l5_s1, which = "all")
+r2(modelo_polr_l5_s1)
