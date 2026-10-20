@@ -1,5 +1,5 @@
 # ==============================================================================
-# AUDITORÍA DE CALIDAD DE DATOS (QC)
+# AUDITORÍA DE CALIDAD DE DATOS
 # Proyecto: Análisis de Niveles de Severidad
 # ==============================================================================
 
@@ -163,84 +163,141 @@ datos_long <- datos %>%
       str_to_title()
   )
 
-# Para Spearman, mapeamos la severidad categórica a una escala ordinal numérica
-# Adaptamos este mapeo si tus valores ya son numéricos o tienen otros nombres:
-mapa_severidad <- c(
-  "Normal/Mild" = 0, "Normal" = 0, "Mild" = 0, "0" = 0,
-  "Moderate"    = 1, "1" = 1,
-  "Severe"      = 2, "2" = 2
+# Correlacion de Spearman
+# Transformar a valores numericos para poder hacer la correlación
+df_num <- datos %>%
+  dplyr::select(-study_id) %>%
+  mutate(across(everything(), ~ case_when(
+    .x == "Normal/Mild" ~ 0,
+    .x == "Moderate"    ~ 1,
+    .x == "Severe"      ~ 2
+  )))
+
+# Matriz de correlación de Spearman completa (25x25)
+matriz_corr_25x25 <- cor(df_num, method = "spearman")
+
+# Definir los 5 grandes grupos de condiciones anatómicas
+grupos <- list(
+  "Canal Espinal"     = 1:5,    # Columnas 1 a 5 (L1-L2 a L5-S1)
+  "Foraminal Izq."    = 6:10,   # Columnas 6 a 10
+  "Foraminal Der."    = 11:15,  # Columnas 11 a 15
+  "Subarticular Izq." = 16:20,  # Columnas 16 a 20
+  "Subarticular Der." = 21:25   # Columnas 21 a 25
 )
 
-# Convertir las variables del dataset original a formato numérico ordinal
-datos_numericos <- datos %>%
-  select(-study_id) %>%
-  mutate(across(everything(), ~ ifelse(.x %in% names(mapa_severidad), mapa_severidad[.x], as.numeric(.x))))
+# Crear la matriz vacía de 5x5 y calcular el promedio de correlación entre grupos
+matriz_macro <- matrix(NA, nrow = 5, ncol = 5, 
+                       dimnames = list(names(grupos), names(grupos)))
 
-# Calcular matriz de correlación de Spearman
-matriz_cor_spearman <- cor(datos_numericos, method = "spearman", use = "pairwise.complete.obs")
+for (i in 1:5) {
+  for (j in 1:5) {
+    # Promedio de las correlaciones entre las 5 variables del grupo i y las 5 del grupo j
+    matriz_macro[i, j] <- mean(matriz_corr_25x25[grupos[[i]], grupos[[j]]])
+  }
+}
 
-# Graficar el mapa de calor (Heatmap)
-p_heatmap <- ggcorrplot(
-  matriz_cor_spearman, 
-  hc.order = FALSE, # Cambia a TRUE solo cuando la matriz no tenga NAs
-  type = "lower", 
-  lab = FALSE, 
-  colors = c("#6D9EC1", "white", "#E46726"), 
-  title = "Mapa de Calor: Correlaciones de Spearman entre Variables y Niveles", 
-  ggtheme = theme_minimal()
-) + 
-  theme( 
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 8), 
-    axis.text.y = element_text(size = 8), 
-    plot.title = element_text(hjust = 0.5, face = "bold") 
+# Convertir la matriz 5x5 a Formato Largo (df_macro_long)
+df_macro_long <- as.data.frame(as.table(matriz_macro)) %>%
+  rename(
+    Condicion1  = Var1,
+    Condicion2  = Var2,
+    Correlacion = Freq
   )
 
-print(p_heatmap)
+# Graficar el mapa de calor sintetizado 5x5
+p_macro <- ggplot(df_macro_long, aes(x = Condicion1, y = Condicion2, fill = Correlacion)) +
+  geom_tile(color = "white", size = 1) +
+  geom_text(aes(label = sprintf("%.2f", Correlacion)), color = "black", fontface = "bold", size = 4.5) +
+  scale_fill_gradient(low = "#ffffcc", high = "#e31a1c", name = "Rho Promedio") +
+  labs(
+    title = "Correlación Promedio entre Tipos de Condición Anatómica",
+    x = "", y = ""
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13, margin = margin(b = 12)),
+    axis.text.x = element_text(angle = 30, hjust = 1, face = "bold", size = 10, color = "black"),
+    axis.text.y = element_text(face = "bold", size = 10, color = "black"),
+    plot.margin = margin(t = 15, r = 15, b = 15, l = 15)
+  )
+
+print(p_macro)
 
 # ==============================================================================
 # 3. GRÁFICOS DE BARRAS DE DISTRIBUCIÓN DE SEVERIDAD
 # ==============================================================================
 # Gráfico 1: Distribución global de severidad por Tipo de Condición
+# Paleta de colores clínica / semántica
+colores_severidad <- c(
+  "Normal/Mild" = "#2ca25f", # Verde médico tranquilo
+  "Moderate"    = "#fdbb84", # Naranja / Ámbar
+  "Severe"      = "#e31a1c"  # Rojo de alerta
+)
+
 p_barras_tipo <- datos_long %>%
   # 1. Forzamos el orden correcto de los niveles
   mutate(severidad = factor(severidad, levels = c("Normal/Mild", "Moderate", "Severe"))) %>% 
-  
-  # 2. Pasamos el resultado al ggplot (ya no necesitas usar factor() dentro de aes)
   ggplot(aes(x = tipo_condicion, fill = severidad)) +
-  geom_bar(position = "fill", color = "black", alpha = 0.85) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_fill_brewer(palette = "Set2", name = "Severidad") +
+  geom_bar(position = "fill", color = "black", size = 0.3, alpha = 0.9) +
+  # Paleta de colores manual ordenada
+  scale_fill_manual(values = colores_severidad, name = "Severidad") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), expand = c(0, 0)) +
   labs(
     title = "Distribución Proporcional de Severidad según Tipo de Condición",
     x = "Tipo de Condición Anatómica",
     y = "Proporción (%)"
   ) +
-  theme_minimal() +
+  theme_minimal(base_size = 12) +
   theme(
-    axis.text.x = element_text(angle = 30, hjust = 1, face = "bold"),
-    plot.title = element_text(hjust = 0.5, face = "bold")
+    # Título centrado y con margen suficiente
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13, margin = margin(b = 12)),
+    # Eje X con ángulo adecuado y alineación para evitar recortes
+    axis.text.x = element_text(angle = 35, hjust = 1, vjust = 1, face = "bold", size = 10, color = "black"),
+    axis.text.y = element_text(size = 10, color = "black"),
+    axis.title.x = element_text(face = "bold", size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(face = "bold", size = 11, margin = margin(r = 10)),
+    # Leyenda clara
+    legend.title = element_text(face = "bold", size = 11),
+    legend.text = element_text(size = 10),
+    # Márgenes de seguridad alrededor del gráfico
+    plot.margin = margin(t = 15, r = 15, b = 20, l = 15)
   )
 
 print(p_barras_tipo)
 
 # Gráfico 2: Distribución por Nivel Lumbar y Tipo de Condición (Facetado)
 p_barras_facet <- datos_long %>%
-  # 1. Forzamos el orden correcto de los niveles
+  # 1. Orden de niveles de severidad
   mutate(severidad = factor(severidad, levels = c("Normal/Mild", "Moderate", "Severe"))) %>% 
   ggplot(aes(x = nivel_lumbar, fill = severidad)) +
-  geom_bar(position = "fill", color = "white") +
-  facet_wrap(~ tipo_condicion, ncol = 3) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_fill_viridis_d(option = "plasma", name = "Severidad") +
+  geom_bar(position = "fill", color = "white", size = 0.2) +
+  # labeller = label_wrap_gen(width = 22) envuelve los títulos largos en 2 líneas
+  facet_wrap(~ tipo_condicion, ncol = 3, labeller = label_wrap_gen(width = 22)) +
+  # Paleta semántica idéntica
+  scale_fill_manual(values = colores_severidad, name = "Severidad") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), expand = c(0, 0)) +
   labs(
-    title = "Distribución de Severidad por Nivel Lumbar y Condición",
+    title = "Distribución de Severidad por Nivel Lumbar y Condición Anatómica",
     x = "Nivel Lumbar",
     y = "Proporción (%)"
   ) +
-  theme_light() +
+  theme_light(base_size = 11) +
   theme(
-    strip.text = element_text(face = "bold", size = 10),
-    plot.title = element_text(hjust = 0.5, face = "bold")
+    # Título principal
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13, margin = margin(b = 12)),
+    # Cabeceras de los Facets (rectángulo oscuro con texto blanco para legibilidad)
+    strip.background = element_rect(fill = "#2c3e50"),
+    strip.text = element_text(face = "bold", size = 9.5, color = "white", margin = margin(t = 5, b = 5)),
+    # Eje X inclinado a 45° para que L1/L2, L2/L3... no se solapen
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8.5, color = "black", face = "bold"),
+    axis.text.y = element_text(size = 9, color = "black"),
+    axis.title.x = element_text(face = "bold", size = 11, margin = margin(t = 8)),
+    axis.title.y = element_text(face = "bold", size = 11, margin = margin(r = 8)),
+    # Leyenda y márgenes
+    legend.title = element_text(face = "bold", size = 10.5),
+    legend.position = "right",
+    plot.margin = margin(t = 15, r = 15, b = 15, l = 15)
   )
+
 
 print(p_barras_facet)
