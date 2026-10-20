@@ -244,10 +244,16 @@ modelo_polr_l1_l2 <- polr(
   Hess = TRUE
 )
 
-# Resumen del modelo y Odds Ratios (OR)
+# Resumen del modelo y Odds Ratios (OR), r2, exactitud y MAE
 summary(modelo_polr_l1_l2)
 exp(cbind(OR = coef(modelo_polr_l1_l2), confint(modelo_polr_l1_l2)))
 r2(modelo_polr_l1_l2)
+pred_clase <- predict(modelo_polr_l1_l2, type = "class")
+real_clase <- df_ordinal$spinal_canal_stenosis_l1_l2
+exactitud <- mean(as.character(pred_clase) == as.character(real_clase)) * 100
+cat("Exactitud Global:", round(exactitud, 2), "%\n")
+mae <- mean(abs(as.numeric(pred_clase) - as.numeric(real_clase)))
+cat("Error Absoluto Medio (MAE):", round(mae, 4), "niveles\n")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l2_l3 <- polr(
@@ -264,6 +270,12 @@ modelo_polr_l2_l3 <- polr(
 summary(modelo_polr_l2_l3)
 exp(cbind(OR = coef(modelo_polr_l2_l3), confint(modelo_polr_l2_l3)))
 r2(modelo_polr_l2_l3)
+pred_clase <- predict(modelo_polr_l2_l3, type = "class")
+real_clase <- df_ordinal$spinal_canal_stenosis_l2_l3
+exactitud <- mean(as.character(pred_clase) == as.character(real_clase)) * 100
+cat("Exactitud Global:", round(exactitud, 2), "%\n")
+mae <- mean(abs(as.numeric(pred_clase) - as.numeric(real_clase)))
+cat("Error Absoluto Medio (MAE):", round(mae, 4), "niveles\n")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l3_l4 <- polr(
@@ -280,6 +292,12 @@ modelo_polr_l3_l4 <- polr(
 summary(modelo_polr_l3_l4)
 exp(cbind(OR = coef(modelo_polr_l3_l4), confint(modelo_polr_l3_l4)))
 r2(modelo_polr_l3_l4)
+pred_clase <- predict(modelo_polr_l3_l4, type = "class")
+real_clase <- df_ordinal$spinal_canal_stenosis_l3_l4
+exactitud <- mean(as.character(pred_clase) == as.character(real_clase)) * 100
+cat("Exactitud Global:", round(exactitud, 2), "%\n")
+mae <- mean(abs(as.numeric(pred_clase) - as.numeric(real_clase)))
+cat("Error Absoluto Medio (MAE):", round(mae, 4), "niveles\n")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l4_l5 <- polr(
@@ -296,6 +314,12 @@ modelo_polr_l4_l5 <- polr(
 summary(modelo_polr_l4_l5)
 exp(cbind(OR = coef(modelo_polr_l4_l5), confint(modelo_polr_l4_l5)))
 r2(modelo_polr_l4_l5)
+pred_clase <- predict(modelo_polr_l4_l5, type = "class")
+real_clase <- df_ordinal$spinal_canal_stenosis_l4_l5
+exactitud <- mean(as.character(pred_clase) == as.character(real_clase)) * 100
+cat("Exactitud Global:", round(exactitud, 2), "%\n")
+mae <- mean(abs(as.numeric(pred_clase) - as.numeric(real_clase)))
+cat("Error Absoluto Medio (MAE):", round(mae, 4), "niveles\n")
 
 # Ajuste del Modelo de Regresión Logística Ordinal
 modelo_polr_l5_s1 <- polr(
@@ -312,3 +336,9 @@ modelo_polr_l5_s1 <- polr(
 summary(modelo_polr_l5_s1)
 exp(cbind(OR = coef(modelo_polr_l5_s1), confint(modelo_polr_l5_s1)))
 r2(modelo_polr_l5_s1)
+pred_clase <- predict(modelo_polr_l5_s1, type = "class")
+real_clase <- df_ordinal$spinal_canal_stenosis_l5_s1
+exactitud <- mean(as.character(pred_clase) == as.character(real_clase)) * 100
+cat("Exactitud Global:", round(exactitud, 2), "%\n")
+mae <- mean(abs(as.numeric(pred_clase) - as.numeric(real_clase)))
+cat("Error Absoluto Medio (MAE):", round(mae, 4), "niveles\n")
