@@ -13,22 +13,24 @@ st.markdown("Sube tu dataset, haz preguntas estadísticas y obtén código R e i
 # CAPA DE DATOS E INDEXACIÓN (RAG Tabular)
 # =====================================================================
 def indexar_y_buscar_datos(user_query, df):
-    """
-    Indexa y busca dinámicamente resúmenes o metadatos del dataset 
-    según lo que solicite el usuario, asegurando trazabilidad y veracidad.
-    """
     contexto_extraido = ""
     query_lower = user_query.lower()
     
-    # 1. Indexación de resúmenes estadísticos si se solicitan métricas
-    if any(palabra in query_lower for palabra in ['resumen', 'estadística', 'media', 'promedio', 'distribución', 'descriptiva', 'resumen']):
-        resumen_numerico = df.describe().to_string()
-        contexto_extraido += f"\n\n[RAG Tabular - Resumen Estadístico Oficial Indexado]:\n{resumen_numerico}\n"
+    # 1. Indexación de resúmenes estadísticos (Soporte Categórico u Ordinal)
+    if any(palabra in query_lower for palabra in ['resumen', 'estadística', 'distribución', 'descriptiva', 'frecuencia', 'tabla']):
+        # Incluye estadísticas para cadenas y factores
+        resumen_tab = df.describe(include='all').fillna('-').to_string()
+        
+        # Conteo rápido de frecuencias por clase para las primeras variables
+        frecuencias = "\n".join([f"- {col}: {dict(df[col].value_counts())}" for col in df.columns[:5]])
+        
+        contexto_extraido += f"\n\n[RAG Tabular - Resumen Estadístico e Imputación]:\n{resumen_tab}\n"
+        contexto_extraido += f"\n[RAG Tabular - Distribución de Frecuencias (Muestra)]: \n{frecuencias}\n"
         
     # 2. Indexación de la estructura de columnas y variables
-    if any(palabra in query_lower for palabra in ['columnas', 'variables', 'estructura', 'datos', 'niveles']):
+    if any(palabra in query_lower for palabra in ['columnas', 'variables', 'estructura', 'datos', 'niveles', 'lumbares']):
         columnas_info = ", ".join(df.columns)
-        contexto_extraido += f"\n\n[RAG Tabular - Estructura de Columnas Indexada]: El dataset contiene las siguientes variables: [{columnas_info}]\n"
+        contexto_extraido += f"\n\n[RAG Tabular - Estructura de Columnas]: El dataset contiene {len(df.columns)} variables: [{columnas_info}]\n"
         
     return contexto_extraido
 # =====================================================================
@@ -58,10 +60,23 @@ genai.configure(api_key=api_key)
 # 3. Inicializar el Agente y la Memoria (Session State)
 if "chat" not in st.session_state:
     system_instruction = """
-    DIRECTIVA PRINCIPAL: Eres un Consultor Bioestadístico Senior especializado en análisis de radiología y patologías espinales. 
+    DIRECTIVA PRINCIPAL: Eres un Consultor Bioestadístico Senior especializado en análisis de radiología, imagenología y patologías espinales. 
     PERSONALIDAD: Tienes un tono cálido, muy amable, empático y accesible. Hablas como un colega cercano o un mentor. Usa un lenguaje natural y conversacional.
     Tu salida debe incluir código reproducible en R (tidyverse), con las líneas para instalar y cargar los paquetes requeridos. 
+    PAUTAS DE RECOMENDACIÓN ESTADÍSTICA:
+        1. Para variables categóricas ordinales (ej. Normal/Mild < Moderate < Severe), RECOMIENDA SIEMPRE métodos no paramétricos y ordinales:
+           - Prueba Chi-Cuadrada (asociación entre estructuras)
+           - Prueba de McNemar-Bowker (evaluación de simetría bilateral izquierda vs. derecha)
+           - Análisis de Correspondencias Múltiples (MCA) y Clustering K-Medoides (PAM) para fenotipos
+           - Regresión Logística Ordinal de Odds Proporcionales (polr de MASS o clm de ordinal)
+        2. Explicita siempre la interpretación de los ODDS RATIOS (OR = e^beta) y la bondad de ajuste mediante Pseudo R2 (McFadden, Nagelkerke) y MAE (Error Absoluto Medio).
     Regla estricta: No des diagnósticos médicos, asume que todo es análisis de datos.
+
+REGLAS DE SALIDA:
+- Todo código en R debe ser completamente reproducible en R (usando tidyverse, MASS, ordinal, etc.), incluyendo la instalación y carga de paquetes.
+- Si el usuario solicita un informe formal, genera un HTML limpio encerrado estrictamente en ```html ... ``` con tablas estilizadas y CSS integrado.
+- No emitas diagnósticos médicos directos; enfócate en el modelado estadístico y la interpretación bioestadística.
+"""
     NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe formal, debes generarlo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
     """
     model = genai.GenerativeModel('gemini-3.6-flash', system_instruction=system_instruction)
@@ -122,6 +137,15 @@ if df is not None:
                 col_b.metric("Mediana", f"{df[var_seleccionada].median():.2f}")
                 col_c.metric("Mínimo", f"{df[var_seleccionada].min()}")
                 col_d.metric("Máximo", f"{df[var_seleccionada].max()}")
+            else:
+                col_a, col_b, col_c = st.columns(3)
+                modo = df[var_seleccionada].mode()[0] if not df[var_seleccionada].empty else "-"
+                n_categorias = df[var_seleccionada].nunique()
+                pct_moda = (df[var_seleccionada] == modo).mean() * 100
+    
+            col_a.metric("Categoría Frecuente (Moda)", str(modo))
+            col_b.metric("Nº de Categorías", n_categorias)
+            col_c.metric("% de la Moda", f"{pct_moda:.1f}%")
             
             st.markdown(f"**Frecuencia de datos para: `{var_seleccionada}`**")
             st.bar_chart(df[var_seleccionada].value_counts().head(20))
