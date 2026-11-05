@@ -215,10 +215,50 @@ print(head(mca_res))
 
 # Gráficos del MCA
 
-# Biplot de individuos (pacientes)
+# Biplot de individuos L1-L2 (pacientes)
+p_mca_ind <- fviz_mca_ind(mca_res,
+                          label = "none",
+                          habillage = "spinal_canal_stenosis_l1_l2", # Colorear por condición clave
+                          addEllipses = TRUE,
+                          ggtheme = theme_minimal(),
+                          title = "MCA - Mapa de Pacientes segun Perfil Lumbar")
+
+print(p_mca_ind)
+
+# Biplot de individuos L2-L3 (pacientes)
+p_mca_ind <- fviz_mca_ind(mca_res,
+                          label = "none",
+                          habillage = "spinal_canal_stenosis_l2_l3", # Colorear por condición clave
+                          addEllipses = TRUE,
+                          ggtheme = theme_minimal(),
+                          title = "MCA - Mapa de Pacientes segun Perfil Lumbar")
+
+print(p_mca_ind)
+
+# Biplot de individuos L3-L4 (pacientes)
+p_mca_ind <- fviz_mca_ind(mca_res,
+                          label = "none",
+                          habillage = "spinal_canal_stenosis_l3_l4", # Colorear por condición clave
+                          addEllipses = TRUE,
+                          ggtheme = theme_minimal(),
+                          title = "MCA - Mapa de Pacientes segun Perfil Lumbar")
+
+print(p_mca_ind)
+
+# Biplot de individuos L4-L5 (pacientes)
 p_mca_ind <- fviz_mca_ind(mca_res,
                           label = "none",
                           habillage = "spinal_canal_stenosis_l4_l5", # Colorear por condición clave
+                          addEllipses = TRUE,
+                          ggtheme = theme_minimal(),
+                          title = "MCA - Mapa de Pacientes segun Perfil Lumbar")
+
+print(p_mca_ind)
+
+# Biplot de individuos L5-S1 (pacientes)
+p_mca_ind <- fviz_mca_ind(mca_res,
+                          label = "none",
+                          habillage = "spinal_canal_stenosis_l5_s1", # Colorear por condición clave
                           addEllipses = TRUE,
                           ggtheme = theme_minimal(),
                           title = "MCA - Mapa de Pacientes segun Perfil Lumbar")
