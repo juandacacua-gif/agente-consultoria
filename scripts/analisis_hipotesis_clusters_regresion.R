@@ -15,6 +15,7 @@ library(vcd)         # Pruebas estadísticas para datos categóricos
 library(MASS)
 library(ordinal)
 library(performance)
+library(cluster)
 
 # 2. CARGA Y PREPARACIÓN DE DATOS
 # ------------------------------------------------------------------------------
@@ -266,7 +267,39 @@ p_mca_ind <- fviz_mca_ind(mca_res,
 print(p_mca_ind)
 
 # ==============================================================================
-# 6. REGRESIÓN LOGÍSTICA ORDINAL
+# 6. ANÁLISIS DE CLUSTERS CON K-MEDOIDES (PAM) + UN SOLO GRÁFICO
+# ==============================================================================
+dist_gower <- daisy(df_analisis, metric = "gower")
+
+# Rplot1: Evaluación del número óptimo de clusters (Silueta)
+p_sil <- fviz_nbclust(as.matrix(dist_gower), pam, method = "silhouette") +
+  labs(title = "Número Óptimo de Clusters (PAM / Medoides)")
+print(p_sil)
+
+# Clustering por K-Medoides con k = 3
+k_optimo <- 3
+pam_res <- pam(dist_gower, k = k_optimo, diss = TRUE)
+
+# Incorporar cluster al dataframe del MCA como variable cualitativa suplementaria
+df_mca$cluster_medoide <- factor(pam_res$clustering)
+mca_res_clusters <- MCA(df_mca, quali.sup = 26, graph = FALSE)
+
+# Rplot2: Un único gráfico de Clusters en el espacio del MCA
+p_clusters_unico <- fviz_mca_ind(
+  mca_res_clusters,
+  label = "none",
+  habillage = "cluster_medoide",  # Variable suplementaria
+  addEllipses = TRUE,
+  ellipse.level = 0.95,
+  palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+  ggtheme = theme_minimal(),
+  title = "Clusters de K-Medoides Representados en Espacio MCA"
+)
+
+print(p_clusters_unico)
+
+# ==============================================================================
+# 7. REGRESIÓN LOGÍSTICA ORDINAL
 # ==============================================================================
 
 df_ordinal <- df %>%
