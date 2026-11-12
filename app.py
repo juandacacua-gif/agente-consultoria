@@ -3,6 +3,9 @@ import pandas as pd
 import google.generativeai as genai
 import re
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 1. Configuración de la página
 st.set_page_config(page_title="Agente Bioestadístico", page_icon="🩺", layout="wide")
@@ -38,7 +41,11 @@ def indexar_y_buscar_datos(user_query, df):
 # 2. Barra lateral (Sidebar) para configuraciones y datos
 with st.sidebar:
     st.header("⚙️ Configuración")
-    api_key = st.text_input("Ingresa tu GEMINI_API_KEY", type="password")
+    api_key = st.text_input(
+        "Ingresa tu GEMINI_API_KEY",
+        type="password",
+        value=os.getenv("GEMINI_API_KEY", ""),
+    )
     st.markdown("---")
     st.header("📁 Datos")
     uploaded_file = st.file_uploader("Sube tu dataset (CSV, Excel)", type=["csv", "xlsx", "xls"])
@@ -76,8 +83,7 @@ REGLAS DE SALIDA:
 - Todo código en R debe ser completamente reproducible en R (usando tidyverse, MASS, ordinal, etc.), incluyendo la instalación y carga de paquetes.
 - Si el usuario solicita un informe formal, genera un HTML limpio encerrado estrictamente en ```html ... ``` con tablas estilizadas y CSS integrado.
 - No emitas diagnósticos médicos directos; enfócate en el modelado estadístico y la interpretación bioestadística.
-"""
-    NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe formal, debes generarlo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
+  NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe formal, debes generarlo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
     """
     model = genai.GenerativeModel('gemini-3.6-flash', system_instruction=system_instruction)
     st.session_state.chat = model.start_chat(history=[])
