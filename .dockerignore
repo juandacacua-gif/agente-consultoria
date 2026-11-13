@@ -1,0 +1,5 @@
+*
+!app.py
+!main.py
+!requirements.lock.txt
+!.streamlit/config.toml
