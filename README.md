@@ -134,6 +134,7 @@ En Windows, R puede no estar en el PATH de Git Bash. Se puede correr un script d
 - **v2:** rol específico de Bioestadístico Clínico con directivas explícitas para asumir escenarios teóricos de investigación. Resultado: flujo continuo sin ruptura de personaje. Problema detectado después: los informes HTML traían p-valores, odds ratios, intervalos, pseudo R² y MAE con tres decimales sin que el agente hubiera ejecutado nada, y uno se basaba en un dataset sintético presentado como "120 pacientes".
 - **v3:** regla de veracidad. El agente no puede ejecutar R ni calcular sobre el archivo completo; se le prohíbe inventar resultados numéricos, generar datos sintéticos sin que se pida, usar predictores ordenados en `polr` y hablar de progresión en datos transversales. Resultado en una corrida de cuatro pruebas (informe HTML, p-valores, código `polr`, interpretación de un OR): el informe marcó las cifras como `[pendiente: ejecutar el script]` y no contenía resultados numéricos, y el agente no dio cifras en las demás. Corridas adicionales: [completar].
 - **v4:** se agrega "no finjas recordar conversaciones anteriores", porque en una prueba el agente saludó como si ya hubiera hablado con el usuario. En la primera prueba posterior no lo repitió.
+- **v5:** se agrega una regla sobre la prueba de simetría bilateral, tras verificar en R el código que entregó el agente (ver [Verificación de resultados](#verificación-de-resultados)): debe usar `mcnemar.test(tabla)` (en tablas k x k es la prueba de simetría de Bowker) y no `MHChisqTest`, que es una prueba de tendencia lineal. Falta una regla equivalente para el pseudo R², pendiente de verificar.
 
 Las reglas están en `app.py` y en `main.py` (dos copias que deben mantenerse iguales).
 
@@ -150,6 +151,7 @@ Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentim
 - **El agente no ejecuta R ni calcula sobre el archivo completo.** Las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que se hayan ejecutado y pegado. Los informes de `informes/` generados con versiones anteriores del prompt (v2) pueden contener cifras no verificadas.
 - La regla de veracidad reduce el problema, pero un modelo de lenguaje puede incumplirla. Verifica antes de citar.
 - A veces el agente asume predictores o contexto sin preguntar, o responde con un script cuando faltaba información.
+- **El código R del agente puede no ejecutarse o no hacer lo que dice.** Ejemplo verificado: llamó "McNemar-Bowker" a una función que no acepta el argumento usado y que además es otra prueba. Ejecuta y revisa cada script antes de usarlo.
 - La librería `google-generativeai` ya no recibe actualizaciones; el reemplazo es `google-genai`. Migración pendiente.
 - El tiempo de respuesta varía (a veces tarda varios segundos), porque cada consulta viaja a la API con el historial de la conversación.
 - Las versiones de los paquetes de R no están fijadas, y la imputación usa `m = 1`.
@@ -161,7 +163,14 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 
 | Fecha | Archivo | Cifra del informe | Valor al ejecutar en R | ¿Coincide? |
 | --- | --- | --- | --- | --- |
-| [completar] | train_limpio_imputado.csv | [completar] | [completar] | [completar] |
+| 2026-11-13 | train_limpio_imputado.csv | Simetría L4-L5 foraminal (informe v2): χ² = 4.12, df = 3, p = 0.248 | `mcnemar.test`: χ² = 0.591, df = 3, p = 0.8985 | No |
+| 2026-11-13 | train_limpio_imputado.csv | OR subarticular izquierda (informe v2): Moderate 3.86, Severe 17.99 | 5.286 y 27.555 (`polr`, predictores no ordenados) | No |
+| 2026-11-13 | train_limpio_imputado.csv | OR subarticular derecha (informe v2): Moderate 2.94, Severe 11.59 | 4.829 y 19.514 | No |
+| 2026-11-13 | train_limpio_imputado.csv | MAE (informe v2): 0.26 | 0.2537 (predecir siempre la moda da 0.3782) | Aproximado; el informe no daba línea base |
+| 2026-11-13 | train_limpio_imputado.csv | Código del agente: `MHChisqTest(tabla, fitted = TRUE)` como "McNemar-Bowker" | Error `unused argument`; la función es la prueba de tendencia lineal de Mantel-Haenszel (X² = 290.75, df = 1) | No |
+| 2026-11-13 | train_limpio_imputado.csv | Código del agente: `nagelkerke(modelo)$PseudoR2` | No existe ese elemento; la tabla real es `Pseudo.R.squared.for.model.vs.null` y devolvió `NA` | No |
+
+El script que hizo esta verificación es `scripts/verificacion_codigo_agente.R` (R 4.6.0, DescTools 0.99.60, rcompanion 2.5.4, MASS 7.3.65). Las cifras del informe v2 salen de `informe_clinico (1).html`, generado con la versión v2 del prompt; el modelo del informe usaba predictores ordenados y el de la verificación no, así que la comparación de los OR es indicativa.
 
 ## Estructura del repositorio
 

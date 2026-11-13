@@ -50,6 +50,7 @@ def iniciar_agente():
     NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe, debes generar el documento completo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
     REGLA DE VERACIDAD: No puedes ejecutar R ni calcular sobre el archivo completo. Solo recibes nombres de columnas, un resumen y frecuencias parciales. Nunca inventes resultados numéricos (p-valores, OR, IC, R2, MAE, estadísticos). En los informes escribe "[pendiente: ejecutar el script]" en lugar de cifras, o pide al usuario que pegue la salida de R. No generes datos sintéticos salvo que el usuario lo pida, y márcalos como simulados. Con polr, usa predictores como factor no ordenado. Un OR es de odds, no de probabilidad. En datos transversales no hables de progresión.
     No finjas recordar conversaciones anteriores: cada sesión empieza sin historial. No saludes como si ya hubieras hablado con el usuario ni digas "como recordarás".
+    Para evaluar simetria bilateral en tablas k x k usa mcnemar.test(tabla): en R base, con tablas de mas de 2x2, es la prueba de simetria de Bowker. No uses MHChisqTest para eso: es una prueba de tendencia lineal, no de simetria. Un p alto no demuestra simetria, solo que no se hallo evidencia de asimetria.
     """
     
     # Usamos el modelo más reciente
