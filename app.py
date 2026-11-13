@@ -123,7 +123,7 @@ if df is not None:
         
         with tab1:
             st.markdown("**Vista previa de las primeras 10 filas:**")
-            st.dataframe(df.head(10), use_container_width=True)
+            st.dataframe(df.head(10), width="stretch")
             
         with tab2:
             st.markdown("### 📈 Métricas Generales")
@@ -149,9 +149,9 @@ if df is not None:
                 n_categorias = df[var_seleccionada].nunique()
                 pct_moda = (df[var_seleccionada] == modo).mean() * 100
     
-            col_a.metric("Categoría Frecuente (Moda)", str(modo))
-            col_b.metric("Nº de Categorías", n_categorias)
-            col_c.metric("% de la Moda", f"{pct_moda:.1f}%")
+                col_a.metric("Categoría Frecuente (Moda)", str(modo))
+                col_b.metric("Nº de Categorías", n_categorias)
+                col_c.metric("% de la Moda", f"{pct_moda:.1f}%")
             
             st.markdown(f"**Frecuencia de datos para: `{var_seleccionada}`**")
             st.bar_chart(df[var_seleccionada].value_counts().head(20))
