@@ -1,77 +1,155 @@
 # Agente Bioestadístico Clínico (Proyecto RSNA Lumbar Spine)
 
-## Instrucciones de Ejecución
-1. Clonar el repositorio.
-2. Instalar dependencias.
-3. Cargar el dashboard.
-  
-## Arquitectura y Decisiones de Recursos
-* **Elección de Modelo:** Se utilizó la API de Gemini 3.6 Flash.
-* **Justificación:** Se descartó cuantización local (ej. Mistral Q4_K_M) debido a la alta latencia en hardware estándar y la posible pérdida de precisión al generar código en R. La API ofrece memoria virtual ilimitada para el usuario local y protege los datos médicos al usar bases de datos ya anonimizadas (Kaggle RSNA).
+Consultor bioestadístico asistido por IA para investigación clínica. El usuario escribe una consulta o sube un CSV/Excel; el agente identifica tipos de variables, revisa supuestos, recomienda pruebas y entrega código en R con su interpretación. No da diagnósticos médicos.
 
-## Versionado de Prompts
-* **v1:** Rol general estadístico. *Problema:* El agente se negaba a responder al detectar la palabra "pacientes" por filtros de seguridad.
-* **v2:** Rol específico de "Bioestadístico Clínico" con directivas de sistema explícitas para asumir escenarios teóricos de investigación. *Resultado:* Flujo continuo sin ruptura de personaje.
+**Importante:** el agente no ejecuta R ni calcula sobre el archivo completo. Entrega scripts que la persona debe ejecutar y verificar. Ver [Limitaciones conocidas](#limitaciones-conocidas).
 
-## Justificación y necesidad
-Se le pone al agente el rol de Consultor Bioestadístico con la especialidad en investigación clínica y médica, para guiar a investigadores y médicos a analizar bases de datos clínicas, diseñar experimentos, elegir pruebas estadísticas adecuadas y generar código, con validez metodológica.
+## Requisitos
 
-* **Habilidades del agente:**
+- Python 3.12 (versión con la que se probó)
+- Git
+- Una clave de la API de Gemini (Google AI Studio)
+- R 4.6.0 (2026-04-24, ucrt). Solo se necesita para ejecutar los scripts de `scripts/` y los que genera el agente.
 
-•	Identificación de Variables: Determinar si son cualitativas (como leve, moderado, severo), cuantitativas (como edad), y su nivel de medición.
+## Ejecución desde un clon limpio
 
-•	Evaluación de Datos: Evaluar datos faltantes o inconsistentes buscando formas de limpiar la base antes de analizar **(no hace limpieza ni imputación si el usuario no lo pide)**.
+```bash
+git clone https://github.com/juandacacua-gif/agente-consultoria.git
+cd agente-consultoria
 
-•	Validación de Supuestos: Evaluar normalidad y homocedasticidad, e identificar si las distribuciones no son normales.
+python -m venv .venv
+source .venv/Scripts/activate      # Windows (Git Bash). En Linux/macOS: source .venv/bin/activate
+pip install -r requirements.lock.txt
 
-•	Elección de métodos y pruebas: Recomendar pruebas adecuadas, ver bien cuándo usar pruebas paramétricas cuando usar pruebas no paramétricas según como estén los datos.
+cp .env.example .env               # luego abre .env y pega tu clave
+streamlit run app.py
+```
 
-•	Interpretación Clínica: Ayudar a interpretar los resultados estadísticos (p-valor, intervalos de confianza) en un contexto médico, **sin** dar ningún diagnóstico clínico.
+La app abre en http://localhost:8501. Si `.env` tiene la clave, no la pide; si no, la solicita en el menú lateral.
 
-•	Códigos: Dar ejemplos claros en lenguaje de R usando paquetes como tidyverse.
+Versión de consola: `python main.py` (requiere `GEMINI_API_KEY` en `.env`). Pide el nombre de un archivo `.csv`, `.xlsx` o `.xls` (o Enter para omitir) y se cierra con `salir`. Si el agente entrega código R, `main.py` lo guarda como `script_analisis.R` (archivo ignorado por git).
 
-* **Observaciones del agente:**
+### Variables de entorno
 
-•	Si el usuario da escenarios con pacientes, enfermedades, imágenes o medicamentos, se asume que es un ejercicio de análisis de datos de investigación sin tener que dar diagnósticos médicos.
+| Variable | Uso |
+| --- | --- |
+| `GEMINI_API_KEY` | Clave de la API de Gemini. Va en `.env`, que está en `.gitignore`. Nunca se sube. |
 
-•	No sugerir análisis que violen los supuestos de los datos (como dar promedios para variables ordinales o cualitativas).
+`.env.example` solo contiene un marcador. No pongas claves reales en él. Si una clave se expone, se revoca en Google AI Studio y se crea otra.
 
-•	Si el usuario pide ayuda de diseño, pero no da archivos, explicar el árbol de decisiones estadísticas y dar un código simulado en R.
+### Dependencias de Python
 
-•	Si el usuario sube un archivo CSV o tabla, leer primero las columnas, diagnosticar de los tipos de variables y proponer el código exacto.
+- `requirements.txt`: dependencias directas, con rangos.
+- `requirements.lock.txt`: versiones exactas con las que se probó (Python 3.12, Windows). Úsalo para reproducir el entorno.
 
-* **Restricciones del agente:**
+### Configuración de Streamlit
 
-•	No dar consejos médicos o diagnósticos
+`.streamlit/config.toml` desactiva la telemetría y evita que Streamlit pida un correo en el primer arranque.
 
-•	No imputar datos faltantes sin consentimiento
+## Datos
 
-•	No sugerir pruebas paramétricas sin comprobar los supuestos
+| Archivo | Descripción |
+| --- | --- |
+| `train.csv` | Base original del reto Kaggle RSNA 2024 Lumbar Spine Degenerative Classification. El dataset lo describen Richards et al. (2026), *The RSNA LumbarDISC Dataset*, Radiol AI, doi:10.1148/ryai.250480. Licencia de redistribución: [completar] |
+| `train_limpio_imputado.csv` | Generado a partir de `train.csv` por `scripts/analisis_preliminar_exploratorio.R`. Los datos faltantes se imputan con MICE (`mice`, `method = 'polr'`, `m = 1`, `set.seed(123)`). |
 
-•	Se deben verificar manualmente los códigos que da el agente
+Notas sobre la imputación:
 
-## Diseño y configuración
+- Con `m = 1` se hace una sola imputación, así que los análisis posteriores no reflejan la incertidumbre de los datos imputados. Es una limitación.
+- Al usar el archivo imputado, los valores faltantes originales ya no son visibles.
+- El agente no imputa datos por su cuenta ni sin consentimiento.
 
-En la entrada del agente, el usuario ingresa una consulta en lenguaje natural o sube un archivo CSV o tabla con datos clínicos, allí se habilitan las habilidades de leer los datos analizando los encabezados y tipos de datos, comprobando los supuestos estadísticos y generando el código de R.
+## Scripts de R
 
-* **Rutas del agente:**
+Se ejecutan desde la raíz del repositorio, porque leen los CSV desde el directorio de trabajo.
 
-•	Si el usuario no especifica el tipo de variable clínica; El agente detiene el análisis y pregunta.
+| Orden | Script | Entrada | Salida |
+| --- | --- | --- | --- |
+| 1 | `scripts/analisis_preliminar_exploratorio.R` | `train.csv` | `train_limpio_imputado.csv` |
+| 2 | `scripts/analisis_hipotesis_clusters_regresion.R` | `train_limpio_imputado.csv` | Pruebas de hipótesis, clusters y regresión |
 
-•	Si se violan los supuestos, el agente busca pruebas no paramétricas.
+El archivo imputado ya está versionado, así que no hace falta regenerarlo para correr el segundo script.
 
-•	El agente se detiene cuando entrega un código de R, validado y con su respectiva interpretación clínica.
+### Paquetes de R
 
-Se elige un modelo basado en API en Gems de Gemini usando Gemini 3.6 Flash, se elige por ser capaz de leer bases grandes sin perder información, y por tener bajo costo, como la base de datos publica de RSNA es anónima, hay un riesgo nulo de exponer información personal de salud.
+| Script | Paquetes |
+| --- | --- |
+| `analisis_preliminar_exploratorio.R` | tidyverse, janitor, naniar, mice, rstatix, ggcorrplot (el script instala los que falten) |
+| `analisis_hipotesis_clusters_regresion.R` | tidyverse, factoextra, FactoMineR, vcd, MASS, ordinal, performance, cluster (no instala nada) |
 
-## Implementación técnica
+Para instalar los del segundo script:
 
-En el archivo *requirements.txt* se indican las versiones de las librerías a usar, que son *google-generativeai==0.5.0*, *python-dotenv==1.0.1* y *pandas>=2.0.0*.
+```r
+install.packages(c("tidyverse", "factoextra", "FactoMineR", "vcd",
+                   "MASS", "ordinal", "performance", "cluster"))
+```
 
-Para la gestión de errores, se pone un limite de tasa donde el código esperara 10 segundos y reintentará si la API nota muchas peticiones, si el agente devuelve texto en lugar de código, el sistema le pedirá a la IA que lo corrija.
+Las versiones de los paquetes de R no están fijadas, y los resultados pueden variar entre versiones.
 
-Se eligió la API externa en la nuble que no consume VRAM local y da respuestas en alrededor de 2 segundos, optimizando el costo computacional.
+En Windows, R puede no estar en el PATH de Git Bash. Se puede correr un script desde RStudio, o con la ruta completa, por ejemplo `"/c/Program Files/R/R-4.6.0/bin/Rscript.exe" scripts/analisis_preliminar_exploratorio.R` (comprueba la ruta en tu equipo).
 
-Las credenciales como la clave API están en un archivo llamado “.env”, y el código allí lee la clave.
+## Arquitectura y decisiones
 
-El archivo *main.py* divide las responsabilidades, carga credenciales, gestiona errores de red y ejecuta el modelo.
+- **Modelo:** API de Gemini (`gemini-3.6-flash`). Se descartó la cuantización local (por ejemplo Mistral Q4_K_M) por la alta latencia en hardware estándar y la posible pérdida de precisión al generar código en R. La API no consume VRAM local y se usan bases anonimizadas (Kaggle RSNA), por lo que el riesgo de exponer datos personales de salud es nulo.
+- **Interfaz:** dashboard en Streamlit (`app.py`) y versión de consola (`main.py`).
+- **Capa de datos (RAG tabular):** indexación local. El agente recibe nombres de columnas, un resumen estadístico y frecuencias de las primeras variables según la consulta, no el archivo completo.
+- **Errores:** en `main.py`, límite de tasa con espera de 10 segundos y reintento, y validación del archivo (existencia y formato). Si el agente devuelve texto en vez de código, se le pide corregir.
+- **Credenciales:** en `.env`, leídas con `python-dotenv`.
+
+### Versionado de prompts
+
+- **v1:** rol estadístico general. Problema: el agente se negaba a responder al detectar la palabra "pacientes" por filtros de seguridad.
+- **v2:** rol específico de Bioestadístico Clínico con directivas explícitas para asumir escenarios teóricos de investigación. Resultado: flujo continuo sin ruptura de personaje. Problema detectado después: los informes HTML traían p-valores, odds ratios, intervalos, pseudo R² y MAE con tres decimales sin que el agente hubiera ejecutado nada, y uno se basaba en un dataset sintético presentado como "120 pacientes".
+- **v3:** regla de veracidad. El agente no puede ejecutar R ni calcular sobre el archivo completo; se le prohíbe inventar resultados numéricos, generar datos sintéticos sin que se pida, usar predictores ordenados en `polr` y hablar de progresión en datos transversales. Resultado en una corrida de cuatro pruebas (informe HTML, p-valores, código `polr`, interpretación de un OR): el informe marcó las cifras como `[pendiente: ejecutar el script]` y no contenía resultados numéricos, y el agente no dio cifras en las demás. Corridas adicionales: [completar].
+- **v4:** se agrega "no finjas recordar conversaciones anteriores", porque en una prueba el agente saludó como si ya hubiera hablado con el usuario. En la primera prueba posterior no lo repitió.
+
+Las reglas están en `app.py` y en `main.py` (dos copias que deben mantenerse iguales).
+
+## Habilidades y restricciones del agente
+
+Habilidades: identificar variables y su nivel de medición, evaluar datos faltantes o inconsistentes, validar supuestos (normalidad, homocedasticidad), elegir pruebas paramétricas o no paramétricas, interpretar p-valores e intervalos de confianza en contexto clínico, y generar código en R (tidyverse).
+
+Rutas: si el usuario no especifica el tipo de variable, el agente debe detener el análisis y preguntar; si se violan supuestos, busca pruebas no paramétricas; termina cuando entrega código R con su interpretación.
+
+Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentimiento, no sugiere pruebas paramétricas sin comprobar supuestos, no sugiere promedios para variables ordinales o cualitativas, y los códigos que entrega deben verificarse manualmente.
+
+## Limitaciones conocidas
+
+- **El agente no ejecuta R ni calcula sobre el archivo completo.** Las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que se hayan ejecutado y pegado. Los informes de `informes/` generados con versiones anteriores del prompt (v2) pueden contener cifras no verificadas.
+- La regla de veracidad reduce el problema, pero un modelo de lenguaje puede incumplirla. Verifica antes de citar.
+- A veces el agente asume predictores o contexto sin preguntar, o responde con un script cuando faltaba información.
+- La librería `google-generativeai` ya no recibe actualizaciones; el reemplazo es `google-genai`. Migración pendiente.
+- El tiempo de respuesta varía (a veces tarda varios segundos), porque cada consulta viaja a la API con el historial de la conversación.
+- Las versiones de los paquetes de R no están fijadas, y la imputación usa `m = 1`.
+- Docker: no está probado todavía.
+
+## Verificación de resultados
+
+Antes de citar una cifra del agente, ejecútala en R con el archivo correspondiente y anota la comparación:
+
+| Fecha | Archivo | Cifra del informe | Valor al ejecutar en R | ¿Coincide? |
+| --- | --- | --- | --- | --- |
+| [completar] | train_limpio_imputado.csv | [completar] | [completar] | [completar] |
+
+## Estructura del repositorio
+
+| Carpeta o archivo | Contenido |
+| --- | --- |
+| `app.py`, `main.py` | Dashboard en Streamlit y versión de consola |
+| `scripts/` | Scripts de R de análisis exploratorio, imputación y modelado |
+| `train.csv`, `train_limpio_imputado.csv` | Datos |
+| `informes/` | Informes y anteproyecto |
+| `documentacion/` | Protocolo, corpus, banco de preguntas y configuración de NotebookLM (actividad "Nada sin fuente") |
+| `fuentes/` | PDF del corpus de estado del arte |
+| `experimento/` | Análisis del experimento de fuentes (clasificación de referencias) |
+| `entregables/`, `archivo/` | Entregables y memorias consolidadas |
+| `referencias/` | Referencias bibliográficas (`referencias.bib`) |
+| `.env.example`, `.gitattributes`, `.gitignore`, `.streamlit/` | Configuración reproducible |
+
+## Problemas frecuentes
+
+- **"Falta GEMINI_API_KEY":** revisa que `.env` exista en la raíz y que la línea sea `GEMINI_API_KEY=tu-clave`, sin comillas ni espacios.
+- **Aviso `FutureWarning` de `google.generativeai`:** esperado; ver Limitaciones.
+- **"No se pudo leer el archivo" en `main.py`:** el nombre debe existir en la carpeta actual y terminar en `.csv`, `.xlsx` o `.xls`.
+- **Error al subir un archivo en la app:** acepta `.csv`, `.xlsx` y `.xls`.
+- **`R: command not found` en Git Bash:** usa RStudio o la ruta completa de `Rscript.exe`.
