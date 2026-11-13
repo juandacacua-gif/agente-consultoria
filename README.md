@@ -6,9 +6,10 @@ Consultor bioestadístico asistido por IA para investigación clínica. El usuar
 
 ## Requisitos
 
-- Python 3.12 (versión con la que se probó)
+- Python 3.12.10 (versión con la que se probó)
 - Git
 - Una clave de la API de Gemini (Google AI Studio)
+- Docker Desktop (opcional, solo para la ejecución en contenedor)
 - R 4.6.0 (2026-04-24, ucrt). Solo se necesita para ejecutar los scripts de `scripts/` y los que genera el agente.
 
 ## Ejecución desde un clon limpio
@@ -29,6 +30,37 @@ La app abre en http://localhost:8501. Si `.env` tiene la clave, no la pide; si n
 
 Versión de consola: `python main.py` (requiere `GEMINI_API_KEY` en `.env`). Pide el nombre de un archivo `.csv`, `.xlsx` o `.xls` (o Enter para omitir) y se cierra con `salir`. Si el agente entrega código R, `main.py` lo guarda como `script_analisis.R` (archivo ignorado por git).
 
+## Ejecución con Docker
+
+La imagen empaqueta solo la app de Streamlit (`app.py`, `main.py` y `.streamlit/config.toml`). No incluye `.env` ni los datos: la clave se pasa al ejecutar y el CSV se sube desde la interfaz.
+
+```bash
+cp .env.example .env               # pega tu clave en .env (sin comillas)
+docker build -t agente-consultoria:dev .
+docker run -d --rm -p 127.0.0.1:8501:8501 --env-file .env --name agente agente-consultoria:dev
+```
+
+Abre http://localhost:8501. Para detenerlo: `docker stop agente`.
+
+Detalles del `Dockerfile`:
+
+- Imagen base fija: `python:3.12.10-slim-bookworm` (no `latest`).
+- Multi-etapa: las dependencias se instalan en una etapa de construcción con `requirements.lock.txt` y se copian a la imagen final.
+- Corre como usuario sin privilegios (`appuser`).
+- `HEALTHCHECK` contra el endpoint de salud de Streamlit; `docker ps` debe mostrar `(healthy)` en unos 30 segundos.
+- `.dockerignore` funciona como lista blanca: solo entran los archivos que la imagen necesita.
+- El puerto se publica solo en `127.0.0.1`, porque la app no tiene autenticación y el contenedor lleva la clave de la API.
+
+Comprobaciones usadas al validar la imagen:
+
+```bash
+docker ps --format "{{.Names}}  {{.Status}}"    # (healthy)
+docker exec agente whoami                       # appuser
+docker exec agente ls -a //app                  # app.py, main.py, .streamlit (sin .env ni CSV)
+```
+
+La primera construcción tarda unos 15 minutos (descarga e instalación de paquetes) y la imagen pesa alrededor de 1 GB en disco. Las siguientes son rápidas si solo cambia `app.py`.
+
 ### Variables de entorno
 
 | Variable | Uso |
@@ -40,7 +72,7 @@ Versión de consola: `python main.py` (requiere `GEMINI_API_KEY` en `.env`). Pid
 ### Dependencias de Python
 
 - `requirements.txt`: dependencias directas, con rangos.
-- `requirements.lock.txt`: versiones exactas con las que se probó (Python 3.12, Windows). Úsalo para reproducir el entorno.
+- `requirements.lock.txt`: versiones exactas. Se generó en Windows con Python 3.12.10 y se verificó también en Linux, al construir la imagen de Docker. Úsalo para reproducir el entorno.
 
 ### Configuración de Streamlit
 
@@ -121,7 +153,7 @@ Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentim
 - La librería `google-generativeai` ya no recibe actualizaciones; el reemplazo es `google-genai`. Migración pendiente.
 - El tiempo de respuesta varía (a veces tarda varios segundos), porque cada consulta viaja a la API con el historial de la conversación.
 - Las versiones de los paquetes de R no están fijadas, y la imputación usa `m = 1`.
-- Docker: no está probado todavía.
+- Docker: la imagen cubre solo la app de Streamlit. La versión de consola (`main.py`) es interactiva y pide un archivo por ruta, así que no está pensada para el contenedor. No hay pruebas automáticas ni integración continua.
 
 ## Verificación de resultados
 
@@ -144,6 +176,7 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 | `experimento/` | Análisis del experimento de fuentes (clasificación de referencias) |
 | `entregables/`, `archivo/` | Entregables y memorias consolidadas |
 | `referencias/` | Referencias bibliográficas (`referencias.bib`) |
+| `Dockerfile`, `.dockerignore` | Imagen de la app de Streamlit |
 | `.env.example`, `.gitattributes`, `.gitignore`, `.streamlit/` | Configuración reproducible |
 
 ## Problemas frecuentes
@@ -153,3 +186,6 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 - **"No se pudo leer el archivo" en `main.py`:** el nombre debe existir en la carpeta actual y terminar en `.csv`, `.xlsx` o `.xls`.
 - **Error al subir un archivo en la app:** acepta `.csv`, `.xlsx` y `.xls`.
 - **`R: command not found` en Git Bash:** usa RStudio o la ruta completa de `Rscript.exe`.
+- **`docker exec ... ls /app` falla en Git Bash con una ruta de `C:/Program Files/Git/...`:** Git Bash convierte las rutas que empiezan con `/`. Usa `//app` o antepón `MSYS_NO_PATHCONV=1`.
+- **La clave no llega al contenedor:** `--env-file` no quita comillas; la línea de `.env` debe ser `GEMINI_API_KEY=tu-clave`.
+- **`docker exec` dice `No such container`:** el contenedor se ejecutó en primer plano y se detuvo con Ctrl+C. Usa `docker run -d`.
