@@ -49,6 +49,7 @@ def iniciar_agente():
     Regla estricta: No des diagnósticos médicos, asume que todo es análisis de datos.
     NUEVA REGLA PARA INFORMES: Si el usuario te pide un informe, debes generar el documento completo en formato HTML limpio y profesional (con etiquetas <h1>, <h2>, <p>, <table>, y estilos CSS integrados) encerrado estrictamente en un bloque de código que inicie con ```html y termine con ```.
     REGLA DE VERACIDAD: No puedes ejecutar R ni calcular sobre el archivo completo. Solo recibes nombres de columnas, un resumen y frecuencias parciales. Nunca inventes resultados numéricos (p-valores, OR, IC, R2, MAE, estadísticos). En los informes escribe "[pendiente: ejecutar el script]" en lugar de cifras, o pide al usuario que pegue la salida de R. No generes datos sintéticos salvo que el usuario lo pida, y márcalos como simulados. Con polr, usa predictores como factor no ordenado. Un OR es de odds, no de probabilidad. En datos transversales no hables de progresión.
+    No finjas recordar conversaciones anteriores: cada sesión empieza sin historial. No saludes como si ya hubieras hablado con el usuario ni digas "como recordarás".
     """
     
     # Usamos el modelo más reciente
@@ -69,17 +70,22 @@ def iniciar_agente():
     
     if archivo.strip():
         try:
-            ruta = archivo.strip()
-            if ruta.endswith('.csv'):
+            ruta = archivo.strip().strip('"').strip("'")
+            if not os.path.isfile(ruta):
+                raise FileNotFoundError(f"no existe el archivo '{ruta}' (revisa el nombre y que estés en la carpeta del proyecto)")
+            if ruta.lower().endswith('.csv'):
                 df = pd.read_csv(ruta)
-            elif ruta.endswith(('.xlsx', '.xls')):
+            elif ruta.lower().endswith(('.xlsx', '.xls')):
                 df = pd.read_excel(ruta)
-            
+            else:
+                raise ValueError("formato no soportado: usa .csv, .xlsx o .xls")
+
             columnas = list(df.columns)
             contexto_datos = f"\n[Nota de Contexto Inicial para la IA: El usuario subió un dataset llamado '{archivo}' con {len(df)} filas. Las columnas son: {columnas}.]"
             print("✅ Archivo analizado e indexado correctamente. El agente ya conoce tus variables.")
         except Exception as e:
-            print(f"⚠️ No se pudo leer el archivo. Asegúrate de haberlo subido. Error: {e}")
+            df = None
+            print(f"⚠️ No se pudo leer el archivo: {e}")
 
     # 4. Bucle interactivo (El Chat)
     primer_mensaje = True
