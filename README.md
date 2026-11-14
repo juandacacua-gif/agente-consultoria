@@ -168,9 +168,12 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 | 2026-11-13 | train_limpio_imputado.csv | OR subarticular derecha (informe v2): Moderate 2.94, Severe 11.59 | 4.829 y 19.514 | No |
 | 2026-11-13 | train_limpio_imputado.csv | MAE (informe v2): 0.26 | 0.2537 (predecir siempre la moda da 0.3782) | Aproximado; el informe no daba línea base |
 | 2026-11-13 | train_limpio_imputado.csv | Código del agente: `MHChisqTest(tabla, fitted = TRUE)` como "McNemar-Bowker" | Error `unused argument`; la función es la prueba de tendencia lineal de Mantel-Haenszel (X² = 290.75, df = 1) | No |
-| 2026-11-13 | train_limpio_imputado.csv | Código del agente: `nagelkerke(modelo)$PseudoR2` | No existe ese elemento; la tabla real es `Pseudo.R.squared.for.model.vs.null` y devolvió `NA` | No |
+| 2026-11-14 | train_limpio_imputado.csv | Código del agente: `nagelkerke(modelo)` sobre un modelo `MASS::polr` | `rcompanion::nagelkerke` no admite `polr` (solo `lm`, `glm`, `clm`, `clmm`, etc.); la tabla de pseudo R² devolvió `NA` y no hubo advertencia. El elemento `$PseudoR2` que usaba el agente tampoco existe (se llama `Pseudo.R.squared.for.model.vs.null`) | No |
+| 2026-11-14 | train_limpio_imputado.csv | Pseudo R² (informe v2): McFadden 0.284, Nagelkerke 0.387 | Cálculo manual con `logLik` del modelo y del modelo nulo: McFadden 0.358, Cox-Snell 0.409, Nagelkerke 0.532 | No |
 
-El script que hizo esta verificación es `scripts/verificacion_codigo_agente.R` (R 4.6.0, DescTools 0.99.60, rcompanion 2.5.4, MASS 7.3.65). Las cifras del informe v2 salen de `informe_clinico (1).html`, generado con la versión v2 del prompt; el modelo del informe usaba predictores ordenados y el de la verificación no, así que la comparación de los OR es indicativa.
+Los pseudo R² se calcularon aparte, en la consola de RStudio (fórmulas: McFadden = 1 − ll1/ll0; Cox-Snell = 1 − exp(2/n·(ll0 − ll1)); Nagelkerke = Cox-Snell / (1 − exp(2/n·ll0)), con n = 1 975).
+
+El script que hizo la parte restante de esta verificación es `scripts/verificacion_codigo_agente.R` (R 4.6.0, DescTools 0.99.60, rcompanion 2.5.4, MASS 7.3.65). Las cifras del informe v2 salen de `informe_clinico (1).html`, generado con la versión v2 del prompt; el modelo del informe usaba predictores ordenados y el de la verificación no, así que la comparación de los OR es indicativa.
 
 ## Estructura del repositorio
 
