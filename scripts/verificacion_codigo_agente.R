@@ -4,7 +4,7 @@
 # Es de solo lectura: no escribe archivos ni modifica los datos.
 # ==============================================================================
 
-paquetes <- c("tidyverse", "MASS", "DescTools", "rcompanion")
+paquetes <- c("tidyverse", "MASS", "DescTools", "rcompanion", "ordinal")
 faltan <- paquetes[!(paquetes %in% installed.packages()[, "Package"])]
 if (length(faltan) > 0) install.packages(faltan, repos = "https://cloud.r-project.org")
 
@@ -105,5 +105,24 @@ cat("MAE del modelo:              ", round(mae_modelo, 4), "\n")
 cat("MAE de predecir siempre la moda:", round(mae_base, 4), "\n")
 cat("Distribución de la respuesta (proporciones):\n")
 print(round(prop.table(table(d$y)), 3))
+
+# ------------------------------------------------------------------------------
+cat("\n==== 5. PSEUDO R2: CÁLCULO MANUAL Y CON ordinal::clm ====\n")
+# rcompanion::nagelkerke() no admite MASS::polr (devuelve NA); sí admite clm.
+modelo0 <- MASS::polr(y ~ 1, data = d, Hess = TRUE)
+ll1 <- as.numeric(logLik(modelo))
+ll0 <- as.numeric(logLik(modelo0))
+n   <- nrow(d)
+mcf <- 1 - ll1 / ll0
+cs  <- 1 - exp((2 / n) * (ll0 - ll1))
+nag <- cs / (1 - exp((2 / n) * ll0))
+cat("Cálculo manual:\n")
+print(round(c(McFadden = mcf, CoxSnell = cs, Nagelkerke = nag), 3))
+
+modelo_clm <- ordinal::clm(y ~ x_i + x_d, data = d)
+cat("\nlogLik de polr y de clm (deben coincidir):\n")
+print(c(polr = ll1, clm = as.numeric(logLik(modelo_clm))))
+cat("\nnagelkerke() sobre el modelo clm:\n")
+print(nagelkerke(modelo_clm)$Pseudo.R.squared.for.model.vs.null)
 
 cat("\n==== FIN: copia y pega toda esta salida en el chat ====\n")
