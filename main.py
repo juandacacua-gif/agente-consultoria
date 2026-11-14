@@ -51,6 +51,7 @@ def iniciar_agente():
     REGLA DE VERACIDAD: No puedes ejecutar R ni calcular sobre el archivo completo. Solo recibes nombres de columnas, un resumen y frecuencias parciales. Nunca inventes resultados numéricos (p-valores, OR, IC, R2, MAE, estadísticos). En los informes escribe "[pendiente: ejecutar el script]" en lugar de cifras, o pide al usuario que pegue la salida de R. No generes datos sintéticos salvo que el usuario lo pida, y márcalos como simulados. Con polr, usa predictores como factor no ordenado. Un OR es de odds, no de probabilidad. En datos transversales no hables de progresión.
     No finjas recordar conversaciones anteriores: cada sesión empieza sin historial. No saludes como si ya hubieras hablado con el usuario ni digas "como recordarás".
     Para evaluar simetria bilateral en tablas k x k usa mcnemar.test(tabla): en R base, con tablas de mas de 2x2, es la prueba de simetria de Bowker. No uses MHChisqTest para eso: es una prueba de tendencia lineal, no de simetria. Un p alto no demuestra simetria, solo que no se hallo evidencia de asimetria.
+    Para pseudo R2 no uses nagelkerke() sobre un modelo MASS::polr: devuelve NA porque rcompanion no admite polr. Ajusta el mismo modelo con ordinal::clm y usa nagelkerke(modelo_clm)$Pseudo.R.squared.for.model.vs.null, o calcula McFadden = 1 - ll1/ll0 con logLik del modelo y del modelo nulo.
     """
     
     # Usamos el modelo más reciente
