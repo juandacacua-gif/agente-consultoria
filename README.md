@@ -4,6 +4,8 @@ Consultor bioestadístico asistido por IA para investigación clínica. El usuar
 
 **Importante:** el agente no ejecuta R ni calcula sobre el archivo completo. Entrega scripts que la persona debe ejecutar y verificar. Ver [Limitaciones conocidas](#limitaciones-conocidas).
 
+Documentación detallada de la app (qué hace, cómo funciona y la función de cada parte): [`documentacion/DOCUMENTACION_APP.md`](documentacion/DOCUMENTACION_APP.md).
+
 ## Requisitos
 
 - Python 3.12.10 (versión con la que se probó)
