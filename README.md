@@ -1,6 +1,6 @@
 # Agente Bioestadístico Clínico (Proyecto RSNA Lumbar Spine)
 
-Consultor bioestadístico asistido por IA para investigación clínica. El usuario escribe una consulta o sube un CSV/Excel; el agente identifica tipos de variables, revisa supuestos, recomienda pruebas y entrega código en R con su interpretación. No da diagnósticos médicos.
+Consultor bioestadístico asistido por IA para investigación clínica. El usuario escribe una consulta o sube un CSV/Excel; el agente identifica tipos de variables, revisa supuestos, recomienda pruebas y entrega código en R con su interpretación. Su prompt le prohíbe dar diagnósticos médicos.
 
 **Importante:** el agente no ejecuta R ni calcula sobre el archivo completo. Entrega scripts que la persona debe ejecutar y verificar. Ver [Limitaciones conocidas](#limitaciones-conocidas).
 
@@ -47,7 +47,7 @@ Detalles del `Dockerfile`:
 - Imagen base fija: `python:3.12.10-slim-bookworm` (no `latest`).
 - Multi-etapa: las dependencias se instalan en una etapa de construcción con `requirements.lock.txt` y se copian a la imagen final.
 - Corre como usuario sin privilegios (`appuser`).
-- `HEALTHCHECK` contra el endpoint de salud de Streamlit; `docker ps` debe mostrar `(healthy)` en unos 30 segundos.
+- `HEALTHCHECK` contra el endpoint de salud de Streamlit; `docker ps` muestra `(health: starting)` al principio y debe pasar a `(healthy)` en 30 a 60 segundos.
 - `.dockerignore` funciona como lista blanca: solo entran los archivos que la imagen necesita.
 - El puerto se publica solo en `127.0.0.1`, porque la app no tiene autenticación y el contenedor lleva la clave de la API.
 
@@ -91,7 +91,7 @@ Notas sobre la imputación:
 
 - Con `m = 1` se hace una sola imputación, así que los análisis posteriores no reflejan la incertidumbre de los datos imputados. Es una limitación.
 - Al usar el archivo imputado, los valores faltantes originales ya no son visibles.
-- El agente no imputa datos por su cuenta ni sin consentimiento.
+- El prompt le prohíbe imputar datos sin consentimiento del usuario; esa regla no se ha probado de forma sistemática.
 
 ## Scripts de R
 
@@ -124,7 +124,7 @@ En Windows, R puede no estar en el PATH de Git Bash. Se puede correr un script d
 
 ## Arquitectura y decisiones
 
-- **Modelo:** API de Gemini (`gemini-3.6-flash`). Se descartó la cuantización local (por ejemplo Mistral Q4_K_M) por la alta latencia en hardware estándar y la posible pérdida de precisión al generar código en R. La API no consume VRAM local y se usan bases anonimizadas (Kaggle RSNA), por lo que el riesgo de exponer datos personales de salud es nulo.
+- **Modelo:** API de Gemini (`gemini-3.6-flash`). Se descartó la cuantización local (por ejemplo Mistral Q4_K_M) por la alta latencia en hardware estándar y la posible pérdida de precisión al generar código en R. La API no consume VRAM local y se usan bases anonimizadas (Kaggle RSNA), por lo que, con los datos del proyecto, el riesgo de exponer datos personales de salud es bajo. Si se suben datos propios, los nombres de columnas, el resumen estadístico y las frecuencias viajan a la API de Gemini: no subas información personal identificable.
 - **Interfaz:** dashboard en Streamlit (`app.py`) y versión de consola (`main.py`).
 - **Capa de datos (RAG tabular):** indexación local. El agente recibe nombres de columnas, un resumen estadístico y frecuencias de las primeras variables según la consulta, no el archivo completo.
 - **Errores:** en `main.py`, límite de tasa con espera de 10 segundos y reintento, y validación del archivo (existencia y formato). Si el agente devuelve texto en vez de código, se le pide corregir.
@@ -140,7 +140,7 @@ En Windows, R puede no estar en el PATH de Git Bash. Se puede correr un script d
 - **v6:** regla sobre el pseudo R², tras verificar que `rcompanion::nagelkerke()` no admite modelos `MASS::polr` y devuelve `NA`: debe ajustar el mismo modelo con `ordinal::clm` y aplicar `nagelkerke()` sobre él, o calcular los índices a mano con `logLik`. Resultado (n = 2 corridas de la pregunta de pseudo R²): las dos evitaron `nagelkerke()` sobre `polr` y usaron `clm` y `logLik`; su código reprodujo McFadden 0.358489, Cox-Snell 0.409133, Nagelkerke 0.531651 y MAE 0.2537.
 - **v7:** reglas sobre el código R y sobre el saludo, tras las corridas con n = 2: (1) al convertir variables de severidad a factor, fijar `levels` con `Normal/Mild` primero, sin `ordered` en los predictores, y decir cuál es la categoría base al interpretar los OR; (2) el script debe leer el CSV sin dejar la línea comentada y no suponer objetos como `df`; (3) si instala paquetes, indicar el mirror de CRAN; y se prohíben expresiones como "de nuevo" o "como recordarás". Resultado (n = 1 corrida de la pregunta de pseudo R²): sin saludo de "de nuevo"; código autosuficiente que se ejecutó sin cargar `df` y con mirror; referencia `Normal/Mild`, con OR de 5.286 y 27.555 (izquierda) y 4.829 y 19.514 (derecha); y los mismos pseudo R² (0.358489 / 0.409133 / 0.531651) y MAE de 0.2537. Falta repetir la prueba para saber si es consistente.
 
-Las reglas están en `app.py` y en `main.py` (dos copias que deben mantenerse iguales).
+Las reglas v3 a v7 están duplicadas en `app.py` y en `main.py`, y hay que mantenerlas iguales en ambos. El resto del prompt no es idéntico: el de `app.py` incluye pautas de recomendación estadística y reglas de salida (informes HTML) más detalladas que el de `main.py`.
 
 ## Habilidades y restricciones del agente
 
@@ -154,6 +154,7 @@ Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentim
 
 - **El agente no ejecuta R ni calcula sobre el archivo completo.** Las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que se hayan ejecutado y pegado. Los informes de `informes/` generados con versiones anteriores del prompt (v2) pueden contener cifras no verificadas.
 - La regla de veracidad reduce el problema, pero un modelo de lenguaje puede incumplirla. Verifica antes de citar.
+- **Privacidad.** La app acepta cualquier CSV o Excel. Los nombres de columnas, el resumen estadístico y las frecuencias que construye viajan a la API de Gemini. Usa solo datos anonimizados.
 - A veces el agente asume predictores o contexto sin preguntar, o responde con un script cuando faltaba información.
 - **El código R del agente puede no ejecutarse o no hacer lo que dice.** Ejemplo verificado: llamó "McNemar-Bowker" a una función que no acepta el argumento usado y que además es otra prueba. Ejecuta y revisa cada script antes de usarlo.
 - **Nivel de referencia de los factores.** En las dos corridas de la pregunta de pseudo R² el agente convirtió los predictores con `factor()` sin fijar `levels`, así que R tomó `Moderate` como referencia (orden alfabético) y los OR no coinciden con la explicación escrita. Al leer una tabla de `polr`, comprueba cuál es la categoría base. La regla v7 lo corrigió en la única corrida probada.
@@ -183,7 +184,7 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 | 2026-11-14 | train_limpio_imputado.csv | Código del agente, segunda corrida de la pregunta de pseudo R² | Ejecutado cargando `df`: McFadden 0.3585 (0.358489 con `clm`), Cox-Snell 0.409133, Nagelkerke 0.531651 y MAE 0.2537; los OR salen otra vez respecto a `Moderate` | Sí en los índices; No en la referencia |
 | 2026-11-14 | train_limpio_imputado.csv | Código del agente con el prompt v7 (pregunta de pseudo R², n = 1) | Ejecutado sin cargar `df` antes: referencia `Normal/Mild`; OR 5.286 y 27.555 (izquierda), 4.829 y 19.514 (derecha); McFadden 0.3585 (0.358489 con `clm`), Cox-Snell 0.409133, Nagelkerke 0.531651; MAE 0.2537; deviance 1859.593 y AIC 1871.593, iguales a los del modelo con otra referencia | Sí |
 
-Los pseudo R² se calcularon aparte, en la consola de RStudio (fórmulas: McFadden = 1 − ll1/ll0; Cox-Snell = 1 − exp(2/n·(ll0 − ll1)); Nagelkerke = Cox-Snell / (1 − exp(2/n·ll0)), con n = 1 975).
+Los pseudo R² se calcularon primero en la consola de RStudio y después se añadieron al script de verificación como bloque 5 (fórmulas: McFadden = 1 − ll1/ll0; Cox-Snell = 1 − exp(2/n·(ll0 − ll1)); Nagelkerke = Cox-Snell / (1 − exp(2/n·ll0)), con n = 1 975).
 
 El script que hizo la parte restante de esta verificación es `scripts/verificacion_codigo_agente.R` (R 4.6.0, DescTools 0.99.60, rcompanion 2.5.4, MASS 7.3.65). Las cifras del informe v2 salen de `informe_clinico (1).html`, generado con la versión v2 del prompt; el modelo del informe usaba predictores ordenados y el de la verificación no, así que la comparación de los OR es indicativa.
 
