@@ -82,8 +82,10 @@ La primera construcción tarda unos 15 minutos (descarga e instalación de paque
 
 | Archivo | Descripción |
 | --- | --- |
-| `train.csv` | Base original del reto Kaggle RSNA 2024 Lumbar Spine Degenerative Classification. El dataset lo describen Richards et al. (2026), *The RSNA LumbarDISC Dataset*, Radiol AI, doi:10.1148/ryai.250480. Licencia de redistribución: [completar] |
+| `train.csv` | Base original del reto Kaggle RSNA 2024 Lumbar Spine Degenerative Classification. El dataset lo describen Richards et al. (2026), *The RSNA LumbarDISC Dataset*, Radiol AI, doi:10.1148/ryai.250480. Uso gratuito para investigación no comercial, según los autores; se distribuye por Kaggle y por RSNA MIRA (esta última bajo el *RSNA MIRA Dataset Research Use Agreement*). Condiciones de redistribución de este CSV: no verificadas (ver nota abajo). |
 | `train_limpio_imputado.csv` | Generado a partir de `train.csv` por `scripts/analisis_preliminar_exploratorio.R`. Los datos faltantes se imputan con MICE (`mice`, `method = 'polr'`, `m = 1`, `set.seed(123)`). |
+
+Sobre el uso de los datos: el dataset de RSNA se publica para uso no comercial en investigación. Este README no confirma que republicar los CSV en un repositorio esté permitido: antes de hacer público el repositorio o de reutilizar los archivos fuera del curso, revisa las reglas de la competencia de Kaggle y el acuerdo de uso de RSNA MIRA. Si no lo permiten, no versiones los CSV y descárgalos desde Kaggle.
 
 Notas sobre la imputación:
 
