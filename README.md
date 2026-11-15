@@ -28,7 +28,7 @@ streamlit run app.py
 
 La app abre en http://localhost:8501. Si `.env` tiene la clave, no la pide; si no, la solicita en el menú lateral.
 
-Versión de consola: `python main.py` (requiere `GEMINI_API_KEY` en `.env`). Pide el nombre de un archivo `.csv`, `.xlsx` o `.xls` (o Enter para omitir) y se cierra con `salir`. Si el agente entrega código R, `main.py` lo guarda como `script_analisis.R` (archivo ignorado por git).
+Versión de consola: `python main.py` (requiere `GEMINI_API_KEY` en `.env`). Pide el nombre de un archivo `.csv`, `.xlsx` o `.xls` (o Enter para omitir) y se cierra con `salir`. Si el agente entrega código R, `main.py` lo guarda como `script_analisis.R` (ignorado por git); si entrega un informe HTML, lo guarda como `informe_clinico.html` en la carpeta actual (también ignorado en la raíz). Revisa cualquier informe antes de usarlo.
 
 ## Ejecución con Docker
 
@@ -127,7 +127,7 @@ En Windows, R puede no estar en el PATH de Git Bash. Se puede correr un script d
 - **Modelo:** API de Gemini (`gemini-3.6-flash`). Se descartó la cuantización local (por ejemplo Mistral Q4_K_M) por la alta latencia en hardware estándar y la posible pérdida de precisión al generar código en R. La API no consume VRAM local y se usan bases anonimizadas (Kaggle RSNA), por lo que, con los datos del proyecto, el riesgo de exponer datos personales de salud es bajo. Si se suben datos propios, los nombres de columnas, el resumen estadístico y las frecuencias viajan a la API de Gemini: no subas información personal identificable.
 - **Interfaz:** dashboard en Streamlit (`app.py`) y versión de consola (`main.py`).
 - **Capa de datos (RAG tabular):** indexación local. El agente recibe nombres de columnas, un resumen estadístico y frecuencias de las primeras variables según la consulta, no el archivo completo.
-- **Errores:** en `main.py`, límite de tasa con espera de 10 segundos y reintento, y validación del archivo (existencia y formato). Si el agente devuelve texto en vez de código, se le pide corregir.
+- **Errores:** en `main.py`, si la API responde con límite de tasa, el programa espera 10 segundos y vuelve a pedir la entrada (no reenvía la consulta solo: hay que repetirla); además valida el archivo (existencia y formato). No hay corrección automática cuando el agente devuelve texto en vez de código.
 - **Credenciales:** en `.env`, leídas con `python-dotenv`.
 
 ### Versionado de prompts
@@ -152,7 +152,7 @@ Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentim
 
 ## Limitaciones conocidas
 
-- **El agente no ejecuta R ni calcula sobre el archivo completo.** Las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que se hayan ejecutado y pegado. Los informes de `informes/` generados con versiones anteriores del prompt (v2) pueden contener cifras no verificadas.
+- **El agente no ejecuta R ni calcula sobre el archivo completo.** Las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que se hayan ejecutado y pegado. Ninguno de los informes de `informes/` está verificado contra una ejecución en R, y el procedimiento con que se generaron no está documentado: trata sus cifras como no verificadas.
 - La regla de veracidad reduce el problema, pero un modelo de lenguaje puede incumplirla. Verifica antes de citar.
 - **Privacidad.** La app acepta cualquier CSV o Excel. Los nombres de columnas, el resumen estadístico y las frecuencias que construye viajan a la API de Gemini. Usa solo datos anonimizados.
 - A veces el agente asume predictores o contexto sin preguntar, o responde con un script cuando faltaba información.
@@ -195,7 +195,9 @@ El script que hizo la parte restante de esta verificación es `scripts/verificac
 | `app.py`, `main.py` | Dashboard en Streamlit y versión de consola |
 | `scripts/` | Scripts de R de análisis exploratorio, imputación y modelado |
 | `train.csv`, `train_limpio_imputado.csv` | Datos |
-| `informes/` | Informes y anteproyecto |
+| `linea-base.md` | Línea base: comparación del proceso manual con el agente bioestadístico |
+| `historial_*.md`, `historial_agente_bioestadistico.rtf` | Historiales de sesiones del agente, anteriores a la regla de veracidad; sin verificar |
+| `informes/` | Informes (HTML y PDF, cifras no verificadas), anteproyecto y revisión de fuentes |
 | `documentacion/` | Protocolo, corpus, banco de preguntas y configuración de NotebookLM (actividad "Nada sin fuente") |
 | `fuentes/` | PDF del corpus de estado del arte |
 | `experimento/` | Análisis del experimento de fuentes (clasificación de referencias) |
