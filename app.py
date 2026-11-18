@@ -4,6 +4,8 @@ import google.generativeai as genai
 import re
 import os
 from dotenv import load_dotenv
+import base64
+from r_runner_client import ejecutar_en_r, runner_disponible
 
 load_dotenv()
 
@@ -216,6 +218,9 @@ if prompt_final:
                 st.session_state.mensajes.append({"role": "assistant", "content": respuesta_ia})
                 
                 r_match = re.search(r'```[rR]\n(.*?)\n```', respuesta_ia, re.DOTALL)
+                if r_match:
+                    st.session_state.ultimo_codigo_r = r_match.group(1)
+                    st.session_state.ultimo_resultado = None
                 html_match = re.search(r'```html\n(.*?)\n```', respuesta_ia, re.DOTALL)
                 
                 col1, col2 = st.columns(2)
@@ -241,6 +246,68 @@ if prompt_final:
                         
             except Exception as e:
                 st.error(f"Error en la comunicación con la API: {e}")
+
+# =====================================================================
+# Ejecución del código R en un contenedor aislado (sin red)
+# =====================================================================
+if st.session_state.get("ultimo_codigo_r"):
+    st.markdown("---")
+    st.subheader("▶ Ejecutar el código R")
+    st.caption(
+        "El código se ejecuta en un contenedor aparte, sin acceso a internet ni a la "
+        "clave de la API. Revísalo antes de ejecutarlo y verifica el resultado."
+    )
+    with st.expander("Ver el código que se va a ejecutar", expanded=False):
+        st.code(st.session_state.ultimo_codigo_r, language="r")
+
+    runner_ok, runner_info = runner_disponible()
+    if not runner_ok:
+        st.info(
+            "El ejecutor de R no está disponible en este entorno (se activa con "
+            "`docker compose up`). Descarga el script y ejecútalo en tu R."
+        )
+    else:
+        if uploaded_file is None:
+            st.warning("No hay un archivo cargado: el script se ejecutará sin datos.")
+        if st.button("▶ Ejecutar en R (sin red)", key="btn_ejecutar_r"):
+            with st.spinner("Ejecutando en el contenedor de R..."):
+                st.session_state.ultimo_resultado = ejecutar_en_r(
+                    st.session_state.ultimo_codigo_r,
+                    uploaded_file.name if uploaded_file is not None else None,
+                    uploaded_file.getvalue() if uploaded_file is not None else None,
+                )
+
+        res = st.session_state.get("ultimo_resultado")
+        if res:
+            if res.get("error"):
+                st.error(f"No se pudo ejecutar: {res['error']}")
+            else:
+                if res.get("timed_out"):
+                    estado = "⏱️ Se excedió el tiempo límite"
+                elif res.get("ok"):
+                    estado = "✅ Terminó sin errores"
+                else:
+                    estado = "⚠️ Terminó con errores"
+                st.markdown(
+                    f"**{estado}** · {res.get('duration_s', '?')} s · {res.get('r_version', '')}"
+                )
+                st.caption(
+                    "Las cifras de esta salida las calculó R. Aun así, revisa el código: "
+                    "que corra sin error no prueba que sea correcto."
+                )
+                if res.get("stdout"):
+                    st.markdown("**Salida:**")
+                    st.code(res["stdout"], language=None)
+                if res.get("stderr"):
+                    with st.expander("Mensajes y errores de R", expanded=not res.get("ok")):
+                        st.code(res["stderr"], language=None)
+                for i, archivo in enumerate(res.get("files", [])):
+                    st.download_button(
+                        f"⬇️ {archivo['name']}",
+                        data=base64.b64decode(archivo["data_b64"]),
+                        file_name=archivo["name"],
+                        key=f"descarga_r_{i}_{archivo['name']}",
+                    )
 
 if __name__ == "__main__":
     pass

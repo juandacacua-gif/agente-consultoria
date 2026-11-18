@@ -12,7 +12,7 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
-COPY --chown=appuser:appuser app.py main.py ./
+COPY --chown=appuser:appuser app.py main.py r_runner_client.py ./
 COPY --chown=appuser:appuser .streamlit ./.streamlit
 USER appuser
 EXPOSE 8501
