@@ -2,7 +2,7 @@
 
 Consultor bioestadístico asistido por IA para investigación clínica. El usuario escribe una consulta o sube un CSV/Excel; el agente identifica tipos de variables, revisa supuestos, recomienda pruebas y entrega código en R con su interpretación. Su prompt le prohíbe dar diagnósticos médicos.
 
-**Importante:** el agente no ejecuta R ni calcula sobre el archivo completo. Entrega scripts que la persona debe ejecutar y verificar. Ver [Limitaciones conocidas](#limitaciones-conocidas).
+**Importante:** el modelo de lenguaje no ejecuta R ni calcula sobre el archivo completo: entrega scripts. La app puede ejecutarlos por ti en un contenedor aislado y sin red, solo si la levantas con `docker compose` y pulsas el botón de ejecución después de leer el código; sin ese contenedor, ofrece el script para descargarlo y ejecutarlo tú. En ambos casos hay que verificar los resultados. Ver [Limitaciones conocidas](#limitaciones-conocidas).
 
 Documentación detallada de la app (qué hace, cómo funciona y la función de cada parte): [`documentacion/DOCUMENTACION_APP.md`](documentacion/DOCUMENTACION_APP.md).
 
@@ -11,7 +11,7 @@ Documentación detallada de la app (qué hace, cómo funciona y la función de c
 - Python 3.12.10 (versión con la que se probó)
 - Git
 - Una clave de la API de Gemini (Google AI Studio)
-- Docker Desktop (opcional, solo para la ejecución en contenedor)
+- Docker Desktop con Docker Compose (opcional: para la ejecución en contenedor y para el ejecutor de R aislado)
 - R 4.6.0 (2026-04-24, ucrt). Solo se necesita para ejecutar los scripts de `scripts/` y los que genera el agente.
 
 ## Ejecución desde un clon limpio
@@ -34,7 +34,7 @@ Versión de consola: `python main.py` (requiere `GEMINI_API_KEY` en `.env`). Pid
 
 ## Ejecución con Docker
 
-La imagen empaqueta solo la app de Streamlit (`app.py`, `main.py` y `.streamlit/config.toml`). No incluye `.env` ni los datos: la clave se pasa al ejecutar y el CSV se sube desde la interfaz.
+La imagen empaqueta solo la app de Streamlit (`app.py`, `main.py`, `r_runner_client.py` y `.streamlit/config.toml`). No incluye R, `.env` ni los datos: la clave se pasa al ejecutar y el CSV se sube desde la interfaz. Para que la app ejecute el código R, usa la sección siguiente (Docker Compose).
 
 ```bash
 cp .env.example .env               # pega tu clave en .env (sin comillas)
@@ -79,6 +79,38 @@ La primera construcción tarda unos 15 minutos (descarga e instalación de paque
 ### Configuración de Streamlit
 
 `.streamlit/config.toml` desactiva la telemetría y evita que Streamlit pida un correo en el primer arranque.
+
+## Ejecutor de R aislado (Docker Compose)
+
+La app puede ejecutar el código R que entrega el modelo, sin que lo copies a mano. Para eso se levantan dos contenedores con `docker compose`:
+
+| Servicio | Qué hace | Acceso |
+| --- | --- | --- |
+| `app` | La app de Streamlit | Internet (API de Gemini) y el ejecutor. Publicada solo en `127.0.0.1:8501` |
+| `r-runner` | R 4.6.0 con los paquetes que ha usado el agente y un servidor mínimo que ejecuta el script con `Rscript` | Solo una red interna sin salida a internet; no recibe la clave de la API |
+
+```bash
+cp .env.example .env               # pega tu clave en .env (sin comillas)
+docker compose up -d --build
+docker compose ps                  # los dos servicios deben quedar en (healthy)
+```
+
+Para apagarlo: `docker compose down`.
+
+**Cómo se usa.** Tras una respuesta con código R, la app muestra bajo el chat el panel "Ejecutar el código R". Lee el código, pulsa "Ejecutar en R (sin red)" y verás la salida, los mensajes de R y los archivos que genere el script. El resultado no se le devuelve al modelo. Si el ejecutor no está disponible (por ejemplo, con `streamlit run app.py` o con la imagen de la app sola), el panel lo avisa y sigue ofreciendo el script para descargar.
+
+**Aislamiento y límites** (definidos en `docker-compose.yml` y `r-runner/runner.py`):
+
+- Red interna sin salida a internet, sin la clave de la API y sin puertos publicados en tu equipo.
+- Sistema de archivos de solo lectura; solo se escribe en carpetas temporales (256 MB y 64 MB). Usuario sin privilegios, sin capacidades de Linux y sin posibilidad de obtener permisos nuevos.
+- Por ejecución: 120 segundos, 1 GB de memoria, 1 CPU y 128 procesos. Se ejecuta un script a la vez.
+- Los archivos que genera el script se devuelven hasta 2 MB cada uno y 5 MB en total.
+
+**Paquetes de R.** Se instalan al construir la imagen (`r-runner/install_packages.R`) desde una instantánea de CRAN con fecha (`p3m.dev/cran/__linux__/noble/2026-06-23`), así que las versiones son las mismas en cada construcción. Sus versiones están en `documentacion/paquetes_R_ejecutor.csv`. El ejecutor no instala paquetes: si el código pide uno que no está, falla con un mensaje que lo nombra. Para añadirlo, agrégalo a `install_packages.R` y reconstruye la imagen.
+
+**Pruebas del ejecutor** (con los servicios levantados): `bash scripts/probar_ejecutor_r.sh`.
+
+La imagen del ejecutor pesa unos 2 GB en disco (625 MB comprimida).
 
 ## Datos
 
@@ -154,17 +186,19 @@ Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentim
 
 ## Limitaciones conocidas
 
-- **El agente no ejecuta R ni calcula sobre el archivo completo.** Las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que se hayan ejecutado y pegado. Ninguno de los informes de `informes/` está verificado contra una ejecución en R, y el procedimiento con que se generaron no está documentado: trata sus cifras como no verificadas.
+- **El modelo no ejecuta R ni calcula sobre el archivo completo.** El resultado de ejecutar un script (con el ejecutor aislado o a mano) no se le devuelve al modelo, así que las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que las pegues tú. Ninguno de los informes de `informes/` está verificado contra una ejecución en R, y el procedimiento con que se generaron no está documentado: trata sus cifras como no verificadas.
 - La regla de veracidad reduce el problema, pero un modelo de lenguaje puede incumplirla. Verifica antes de citar.
 - **Privacidad.** La app acepta cualquier CSV o Excel. Los nombres de columnas, el resumen estadístico y las frecuencias que construye viajan a la API de Gemini. Usa solo datos anonimizados.
 - A veces el agente asume predictores o contexto sin preguntar, o responde con un script cuando faltaba información.
 - **El código R del agente puede no ejecutarse o no hacer lo que dice.** Ejemplo verificado: llamó "McNemar-Bowker" a una función que no acepta el argumento usado y que además es otra prueba. Ejecuta y revisa cada script antes de usarlo.
 - **Nivel de referencia de los factores.** En las dos corridas de la pregunta de pseudo R² el agente convirtió los predictores con `factor()` sin fijar `levels`, así que R tomó `Moderate` como referencia (orden alfabético) y los OR no coinciden con la explicación escrita. Al leer una tabla de `polr`, comprueba cuál es la categoría base. La regla v7 lo corrigió en la única corrida probada.
 - **El código del agente no siempre es autosuficiente.** En una corrida dejó comentada la línea que lee el CSV y usó un objeto `df` que no existía (en R base `df` es una función, y el error resultante es confuso). En otra instaló paquetes con `install.packages()` sin indicar el mirror de CRAN, lo que falla en sesiones no interactivas (`Rscript`, contenedores) aunque funcione en RStudio. La v7 corrigió ambos casos en la única corrida probada.
+- **El mismo prompt puede generar códigos distintos para la misma pregunta.** En el ejecutor aislado, una respuesta a la pregunta de pseudo R² intentó instalar un paquete que no está en la imagen y falló; al repetir la pregunta, el agente escribió otro código que corrió bien. Que un código funcione una vez no garantiza que la siguiente respuesta funcione.
+- **Aislamiento del ejecutor.** Está en una red interna sin salida a internet, sin la clave y con el sistema de archivos de solo lectura, pero comparte esa red con la app (el código de R podría alcanzar el puerto 8501 de la app, que no expone la clave). Un contenedor reduce el riesgo, no lo elimina: por eso el código se muestra y se ejecuta solo al confirmarlo.
 - La librería `google-generativeai` ya no recibe actualizaciones; el reemplazo es `google-genai`. Migración pendiente.
 - El tiempo de respuesta varía (a veces tarda varios segundos), porque cada consulta viaja a la API con el historial de la conversación.
-- Las versiones de los paquetes de R no están fijadas, y la imputación usa `m = 1`.
-- Docker: la imagen cubre solo la app de Streamlit. La versión de consola (`main.py`) es interactiva y pide un archivo por ruta, así que no está pensada para el contenedor. No hay pruebas automáticas ni integración continua.
+- Las versiones de los paquetes de R de tu equipo no están fijadas (las del ejecutor sí: instantánea de CRAN con fecha), y la imputación usa `m = 1`.
+- Docker: la imagen de la app no incluye R; el ejecutor es otro contenedor (ver Docker Compose). La versión de consola (`main.py`) es interactiva y pide un archivo por ruta, así que no está pensada para el contenedor. Solo hay pruebas del ejecutor (`scripts/probar_ejecutor_r.sh`); no hay integración continua. El ejecutor se probó en Windows con Docker Desktop.
 
 ## Verificación de resultados
 
@@ -185,6 +219,9 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 | 2026-11-14 | train_limpio_imputado.csv | Código del agente, segunda corrida de la pregunta de simetría | Ejecutado cargando `df` antes (el código deja comentada la lectura del CSV): χ² = 0.59109, df = 3, p = 0.8985; Kappa 0.2510 sin ponderar y 0.3076 ponderado, iguales a un cálculo manual sobre la misma tabla | Sí |
 | 2026-11-14 | train_limpio_imputado.csv | Código del agente, segunda corrida de la pregunta de pseudo R² | Ejecutado cargando `df`: McFadden 0.3585 (0.358489 con `clm`), Cox-Snell 0.409133, Nagelkerke 0.531651 y MAE 0.2537; los OR salen otra vez respecto a `Moderate` | Sí en los índices; No en la referencia |
 | 2026-11-14 | train_limpio_imputado.csv | Código del agente con el prompt v7 (pregunta de pseudo R², n = 1) | Ejecutado sin cargar `df` antes: referencia `Normal/Mild`; OR 5.286 y 27.555 (izquierda), 4.829 y 19.514 (derecha); McFadden 0.3585 (0.358489 con `clm`), Cox-Snell 0.409133, Nagelkerke 0.531651; MAE 0.2537; deviance 1859.593 y AIC 1871.593, iguales a los del modelo con otra referencia | Sí |
+| 2026-11-18 | train_limpio_imputado.csv | Código del agente (simetría), ejecutado por la app en el ejecutor aislado | χ² = 0.59109, df = 3, p = 0.8985; Kappa 0.2510 sin ponderar y 0.3076 ponderado | Sí |
+| 2026-11-18 | train_limpio_imputado.csv | Código del agente (pseudo R²), primera respuesta, en el ejecutor aislado | No se ejecutó: intentaba instalar un paquete que no está en la imagen y el ejecutor, sin red, falló | No (el aislamiento funcionó; el código no era autosuficiente) |
+| 2026-11-18 | train_limpio_imputado.csv | Código del agente (pseudo R²), segunda respuesta, en el ejecutor aislado | Coincide con los valores verificados (McFadden 0.358489, Cox-Snell 0.409133, Nagelkerke 0.531651, MAE 0.2537), según lo comprobado en esa ejecución | Sí |
 
 Los pseudo R² se calcularon primero en la consola de RStudio y después se añadieron al script de verificación como bloque 5 (fórmulas: McFadden = 1 − ll1/ll0; Cox-Snell = 1 − exp(2/n·(ll0 − ll1)); Nagelkerke = Cox-Snell / (1 − exp(2/n·ll0)), con n = 1 975).
 
@@ -195,17 +232,20 @@ El script que hizo la parte restante de esta verificación es `scripts/verificac
 | Carpeta o archivo | Contenido |
 | --- | --- |
 | `app.py`, `main.py` | Dashboard en Streamlit y versión de consola |
-| `scripts/` | Scripts de R de análisis exploratorio, imputación y modelado |
+| `scripts/` | Scripts de R de análisis exploratorio, imputación y modelado; verificación del código del agente (`verificacion_codigo_agente.R`) y pruebas del ejecutor (`probar_ejecutor_r.sh`) |
 | `train.csv`, `train_limpio_imputado.csv` | Datos |
 | `linea-base.md` | Línea base: comparación del proceso manual con el agente bioestadístico |
 | `historial_*.md`, `historial_agente_bioestadistico.rtf` | Historiales de sesiones del agente, anteriores a la regla de veracidad; sin verificar |
 | `informes/` | Informes (HTML y PDF, cifras no verificadas), anteproyecto y revisión de fuentes |
-| `documentacion/` | Protocolo, corpus, banco de preguntas y configuración de NotebookLM (actividad "Nada sin fuente") |
+| `documentacion/` | Protocolo, corpus, banco de preguntas y configuración de NotebookLM (actividad "Nada sin fuente"); documentación de la app y versiones de los paquetes de R del ejecutor (`paquetes_R_ejecutor.csv`) |
 | `fuentes/` | PDF del corpus de estado del arte |
 | `experimento/` | Análisis del experimento de fuentes (clasificación de referencias) |
 | `entregables/`, `archivo/` | Entregables y memorias consolidadas |
 | `referencias/` | Referencias bibliográficas (`referencias.bib`) |
 | `Dockerfile`, `.dockerignore` | Imagen de la app de Streamlit |
+| `docker-compose.yml` | App y ejecutor de R aislado |
+| `r-runner/` | Imagen y servidor del ejecutor de R (`Dockerfile`, `install_packages.R`, `runner.py`) |
+| `r_runner_client.py` | Cliente con el que la app habla con el ejecutor |
 | `.env.example`, `.gitattributes`, `.gitignore`, `.streamlit/` | Configuración reproducible |
 
 ## Problemas frecuentes
@@ -218,3 +258,6 @@ El script que hizo la parte restante de esta verificación es `scripts/verificac
 - **`docker exec ... ls /app` falla en Git Bash con una ruta de `C:/Program Files/Git/...`:** Git Bash convierte las rutas que empiezan con `/`. Usa `//app` o antepón `MSYS_NO_PATHCONV=1`.
 - **La clave no llega al contenedor:** `--env-file` no quita comillas; la línea de `.env` debe ser `GEMINI_API_KEY=tu-clave`.
 - **`docker exec` dice `No such container`:** el contenedor se ejecutó en primer plano y se detuvo con Ctrl+C. Usa `docker run -d`.
+- **El panel dice que el ejecutor de R no está disponible:** la app no se levantó con `docker compose up`.
+- **La ejecución falla con "El ejecutor no tiene internet y no puede instalar paquetes":** el código pide un paquete que no está en la imagen. Agrégalo a `r-runner/install_packages.R` y reconstruye (`docker compose up -d --build`).
+- **Un paquete de R no carga en el ejecutor (`cannot open shared object file`):** falta una librería del sistema en `r-runner/Dockerfile`. En la primera construcción faltó `libuv1-dev` (ya añadida).

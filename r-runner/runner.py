@@ -35,6 +35,17 @@ MAX_FILES_TOTAL = 5 * 1024 * 1024  # tamaño total de archivos generados
 NAME_RE = re.compile(r"^[A-Za-z0-9._() -]{1,100}$")
 DATA_EXT = (".csv", ".xlsx", ".xls")
 
+# Se antepone al script, en la misma línea que su primera línea (para no
+# desplazar los números de línea de los mensajes de R). Sustituye
+# install.packages(): sin red no puede instalar nada, y así el error dice qué
+# paquete se pidió y cómo añadirlo a la imagen.
+PRELUDIO = (
+    'install.packages <- function(pkgs, ...) stop("El ejecutor no tiene internet '
+    'y no puede instalar paquetes. Paquete(s) pedido(s): ", paste(pkgs, collapse = ", "), '
+    '". Si hace falta, agregalo a r-runner/install_packages.R y reconstruye la imagen.", '
+    "call. = FALSE)"
+)
+
 _lock = threading.Lock()  # una ejecución a la vez
 
 
@@ -61,7 +72,7 @@ def ejecutar(codigo, nombre_datos, datos):
     workdir = tempfile.mkdtemp(dir=WORK_ROOT)
     try:
         with open(os.path.join(workdir, "script.R"), "w", encoding="utf-8") as f:
-            f.write(codigo)
+            f.write(PRELUDIO + "; " + codigo)
         if nombre_datos:
             with open(os.path.join(workdir, nombre_datos), "wb") as f:
                 f.write(datos)

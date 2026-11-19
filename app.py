@@ -291,10 +291,11 @@ if st.session_state.get("ultimo_codigo_r"):
                 st.markdown(
                     f"**{estado}** · {res.get('duration_s', '?')} s · {res.get('r_version', '')}"
                 )
-                st.caption(
-                    "Las cifras de esta salida las calculó R. Aun así, revisa el código: "
-                    "que corra sin error no prueba que sea correcto."
-                )
+                if res.get("ok"):
+                    st.caption(
+                        "Las cifras de esta salida las calculó R. Aun así, revisa el código: "
+                        "que corra sin error no prueba que sea correcto."
+                    )
                 if res.get("stdout"):
                     st.markdown("**Salida:**")
                     st.code(res["stdout"], language=None)

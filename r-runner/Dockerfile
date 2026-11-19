@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 \
       libcurl4-openssl-dev libssl-dev libxml2-dev \
       libfontconfig1-dev libfreetype6-dev libharfbuzz-dev libfribidi-dev \
-      libpng-dev libjpeg-dev libtiff-dev libglpk-dev libgmp-dev libicu-dev \
+      libpng-dev libjpeg-dev libtiff-dev libglpk-dev libgmp-dev libicu-dev libuv1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Paquetes de R que el agente ha usado en sus scripts (instalados aquí, porque

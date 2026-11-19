@@ -1,6 +1,6 @@
 # Documentación de la app: Consultor Bioestadístico Clínico AI
 
-Última revisión: 2026-11-15, sobre el estado del repositorio en el commit `8a43a67`.
+Última revisión: 2026-11-18 (incluye el ejecutor de R aislado).
 
 Este documento explica qué hace la app, cómo funciona y cuál es la función de cada una de sus partes. Para instalarla y ejecutarla, ver el [README](../README.md).
 
@@ -16,8 +16,8 @@ Es una aplicación web, hecha con Streamlit, que funciona como un **consultor bi
 
 ### Lo que la app NO hace
 
-- **No ejecuta R.** Solo recibe el código del modelo y lo ofrece como descarga (`script_analisis.R`). La persona debe ejecutarlo en su propio R y revisar el resultado. R ni siquiera está instalado en la imagen de Docker.
-- **No calcula pruebas estadísticas.** Lo único que calcula la app son resúmenes descriptivos con pandas (conteos, promedios, frecuencias).
+- **El modelo no ejecuta R.** La app recibe el código y lo ofrece como descarga (`script_analisis.R`). Si se levanta con `docker compose`, también ofrece un botón que lo ejecuta en un contenedor aparte, sin internet ni clave, solo después de que la persona lo revise y lo confirme. El resultado se muestra en pantalla y **no se le devuelve al modelo**. Sin ese contenedor, hay que ejecutar el script en el propio R. En ambos casos, la persona debe revisar el resultado.
+- **La app no calcula pruebas estadísticas.** Lo único que calcula son resúmenes descriptivos con pandas (conteos, promedios, frecuencias); las pruebas las hace R.
 - **No da diagnósticos médicos.** El prompt del agente se lo prohíbe.
 - **No imputa datos faltantes** por su cuenta. El prompt le prohíbe hacerlo sin consentimiento del usuario.
 - **No guarda datos en un servidor.** El archivo subido y la conversación viven en la memoria de la sesión del navegador.
@@ -36,9 +36,10 @@ Persona ──► Interfaz Streamlit (app.py) ──► API de Gemini
    │              │  └────── respuesta ◄────────┘
    │              ├─ pandas: lee el CSV/Excel y calcula resúmenes descriptivos
    │              ├─ indexación local ("RAG tabular"): añade resúmenes del dataset al mensaje
-   │              └─ extrae los bloques ```r y ```html de la respuesta → botones de descarga
+   │              ├─ extrae los bloques ```r y ```html de la respuesta → botones de descarga
+   │              └─ (opcional, con docker compose) envía el código R al ejecutor aislado: R sin red
    │
-   └─ ejecuta script_analisis.R en su R y VERIFICA los resultados
+   └─ revisa el código, lo ejecuta (en el ejecutor aislado o en su R) y VERIFICA los resultados
 ```
 
 Paso a paso:
@@ -50,7 +51,8 @@ Paso a paso:
 5. **Armado del mensaje.** La app construye el texto que se envía al modelo: la pregunta, más (si hay datos) el contexto del dataset (ver sección 6).
 6. **Respuesta.** Gemini responde con explicación y, normalmente, código en R. La app muestra la respuesta, la guarda en la conversación y busca bloques de código.
 7. **Descarga.** Si hay un bloque de R, aparece el botón de descarga de `script_analisis.R`; si hay un bloque HTML, el de `informe_clinico.html`.
-8. **Verificación fuera de la app.** La persona ejecuta el script en R y revisa los resultados antes de usarlos.
+8. **Ejecución opcional en el contenedor aislado.** Si la app se levantó con `docker compose`, bajo el chat aparece el panel "Ejecutar el código R": la persona lee el código, pulsa el botón y la app lo envía, junto con el archivo cargado, al ejecutor. Allí corre sin internet y sin la clave, con límites de tiempo y memoria, y la app muestra la salida, los errores y los archivos generados.
+9. **Verificación.** La persona revisa el código y los resultados antes de usarlos: que el ejecutor devuelva una salida sin errores no garantiza que el análisis sea correcto.
 
 ## 4. Las partes de la interfaz
 
@@ -67,6 +69,7 @@ Paso a paso:
 | Sugerencias de análisis | Sobre la caja de texto | Tres botones con consultas predefinidas (sección 5) |
 | Caja de consulta | Parte inferior | "Escribe tu propia consulta estadística..." |
 | Botones de descarga | Bajo cada respuesta con código | "Descargar script_analisis.R" y "Descargar informe.html" |
+| Panel "Ejecutar el código R" | Al final de la página, tras una respuesta con código R | Muestra el código, el botón "Ejecutar en R (sin red)" y el resultado (salida, mensajes de R y archivos generados). Si no hay ejecutor, avisa y deja el script para descargar |
 
 ### Resumen visual de una variable
 
@@ -114,12 +117,16 @@ La historia de cada versión, con sus resultados, está en el apartado "Versiona
 
 | Archivo | Función |
 | --- | --- |
-| `app.py` | La app de Streamlit: interfaz, indexación local, chat con el modelo y descargas |
+| `app.py` | La app de Streamlit: interfaz, indexación local, chat con el modelo, descargas y panel de ejecución de R |
 | `main.py` | Versión de consola del mismo agente. Pide un archivo por ruta, mantiene el chat, guarda el código R en `script_analisis.R` y el HTML en `informe_clinico.html`, y espera 10 segundos si la API responde con límite de tasa. Su prompt es más corto que el de `app.py` |
 | `requirements.txt` / `requirements.lock.txt` | Dependencias con rangos y con versiones exactas, respectivamente |
 | `.env` / `.env.example` | La clave de la API (nunca se sube) y su plantilla |
 | `.streamlit/config.toml` | Desactiva la telemetría y la pregunta de correo de Streamlit |
-| `Dockerfile` / `.dockerignore` | Imagen de la app: Python 3.12.10, multi-etapa, usuario sin privilegios y chequeo de salud. Solo incluye `app.py`, `main.py` y la configuración de Streamlit |
+| `Dockerfile` / `.dockerignore` | Imagen de la app: Python 3.12.10, multi-etapa, usuario sin privilegios y chequeo de salud. Incluye `app.py`, `main.py`, `r_runner_client.py` y la configuración de Streamlit; no incluye R |
+| `docker-compose.yml` | Levanta la app y el ejecutor de R, y define el aislamiento (red interna sin internet, sistema de archivos de solo lectura, límites de recursos) |
+| `r-runner/` | Imagen del ejecutor: R 4.6.0 (`rocker/r-ver`) con los paquetes de R que ha usado el agente (`install_packages.R`) y un pequeño servidor (`runner.py`) que ejecuta el script con `Rscript` |
+| `r_runner_client.py` | Cliente con el que la app envía el código y los datos al ejecutor |
+| `scripts/probar_ejecutor_r.sh` | Comprueba el aislamiento del ejecutor y su funcionamiento |
 | `scripts/analisis_preliminar_exploratorio.R` | Exploración y limpieza de `train.csv`; imputa los faltantes con MICE y escribe `train_limpio_imputado.csv` |
 | `scripts/analisis_hipotesis_clusters_regresion.R` | Análisis con `train_limpio_imputado.csv`: pruebas de hipótesis, clusters y regresión (según los paquetes que carga) |
 | `scripts/verificacion_codigo_agente.R` | Comprueba en R el código que entregó el agente y reproduce las cifras verificadas |
@@ -139,6 +146,8 @@ Lo que debe saber quien use la app:
 6. **Reiniciar la página borra la sesión.** Al recargar el navegador se pierden la conversación y el archivo cargado; conviene descargar el historial antes.
 7. **Solo se ofrece el primer bloque de código.** Si la respuesta trae varios bloques de R, el botón de descarga entrega solo el primero.
 8. **Formatos.** Solo `.csv`, `.xlsx` y `.xls`. Aunque `pyreadstat` figura en `requirements.txt`, la app no lo usa, así que no lee archivos de SPSS, Stata ni SAS.
+9. **El agente puede escribir códigos distintos para la misma pregunta.** Uno puede correr y otro no (por ejemplo, porque pide un paquete que el ejecutor no tiene). Si el ejecutor dice que no puede instalar un paquete, hay que añadirlo a `r-runner/install_packages.R` y reconstruir la imagen.
+10. **El ejecutor reduce el riesgo, no lo elimina.** Corre sin internet, sin la clave y con el sistema de archivos de solo lectura, pero comparte una red interna con la app. Por eso el código se muestra y se ejecuta solo cuando la persona lo confirma.
 
 ## 10. Flujo de trabajo recomendado
 
@@ -153,4 +162,6 @@ Lo que debe saber quien use la app:
 
 ## 11. Ampliaciones posibles
 
-La app no ejecuta R. Las opciones consideradas para que lo haga, con sus riesgos, fueron: ejecutar `Rscript` dentro de la app (el código del modelo correría con los permisos de la app y podría leer la clave de la API), usar un contenedor de R aparte y sin red, o reemplazar el código libre por funciones propias verificadas que el modelo solo invoque. Quedan como mejora futura; ninguna está implementada.
+Se consideraron tres formas de ejecutar el código R desde la app: dentro de la propia app (descartada: el código del modelo correría con los permisos de la app y podría leer la clave de la API), en un contenedor aparte y sin red (la elegida, ver las secciones anteriores) y reemplazar el código libre por funciones propias verificadas que el modelo solo invoque (pendiente).
+
+Mejoras posibles sobre lo implementado: mostrar los gráficos como imagen en la app, devolver el resultado de R al modelo para que lo interprete (solo con confirmación explícita, porque saldrían datos hacia la API de Gemini) y permitir varias ejecuciones seguidas con el mismo archivo.
