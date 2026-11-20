@@ -4,6 +4,8 @@ Consultor bioestadístico asistido por IA para investigación clínica. El usuar
 
 **Importante:** el modelo de lenguaje no ejecuta R ni calcula sobre el archivo completo: entrega scripts. La app puede ejecutarlos por ti en un contenedor aislado y sin red, solo si la levantas con `docker compose` y pulsas el botón de ejecución después de leer el código; sin ese contenedor, ofrece el script para descargarlo y ejecutarlo tú. En ambos casos hay que verificar los resultados. Ver [Limitaciones conocidas](#limitaciones-conocidas).
 
+**Recomendación:** para ejecutar el código R que entrega el agente, usa la app con Docker Compose ([Ejecutor de R aislado](#ejecutor-de-r-aislado-docker-compose)). El código lo escribe un modelo de lenguaje y puede fallar o hacer algo distinto de lo que dice. En el ejecutor corre sin internet, sin la clave de la API, con el sistema de archivos de solo lectura y con límites de tiempo y memoria; en tu propio R correría con tus permisos y tus archivos. Un contenedor reduce el riesgo, no lo elimina: lee siempre el código antes de ejecutarlo.
+
 Documentación detallada de la app (qué hace, cómo funciona y la función de cada parte): [`documentacion/DOCUMENTACION_APP.md`](documentacion/DOCUMENTACION_APP.md).
 
 ## Requisitos
@@ -82,7 +84,7 @@ La primera construcción tarda unos 15 minutos (descarga e instalación de paque
 
 ## Ejecutor de R aislado (Docker Compose)
 
-La app puede ejecutar el código R que entrega el modelo, sin que lo copies a mano. Para eso se levantan dos contenedores con `docker compose`:
+**Esta es la forma recomendada de ejecutar el código R que entrega el agente.** La app puede ejecutarlo sin que lo copies a mano. Para eso se levantan dos contenedores con `docker compose`:
 
 | Servicio | Qué hace | Acceso |
 | --- | --- | --- |
@@ -95,7 +97,14 @@ docker compose up -d --build
 docker compose ps                  # los dos servicios deben quedar en (healthy)
 ```
 
-Para apagarlo: `docker compose down`.
+**Uso diario** (con Docker Desktop abierto):
+
+1. `docker compose up -d`, y espera a que los dos servicios queden en `(healthy)` (`docker compose ps`).
+2. Abre http://localhost:8501, sube el archivo y escribe la consulta.
+3. Si el agente entrega código R, lo ves en el panel "Ejecutar el código R" y lo ejecutas con el botón.
+4. **Al terminar, apágalo con `docker compose down`.** Esto elimina los contenedores y las redes. El contenedor de la app guarda la clave de la API, así que no conviene dejarlo encendido. Comprueba con `docker ps` que no queda ninguno de `agente-consultoria`.
+
+Las imágenes quedan en disco, así que la siguiente vez el arranque es rápido. Con `streamlit run app.py` (sin Docker) la app funciona, pero no ofrece el botón de ejecución: solo el script para descargar. No uses los dos modos a la vez, porque ambos usan el puerto 8501.
 
 **Cómo se usa.** Tras una respuesta con código R, la app muestra bajo el chat el panel "Ejecutar el código R". Lee el código, pulsa "Ejecutar en R (sin red)" y verás la salida, los mensajes de R y los archivos que genere el script. El resultado no se le devuelve al modelo. Si el ejecutor no está disponible (por ejemplo, con `streamlit run app.py` o con la imagen de la app sola), el panel lo avisa y sigue ofreciendo el script para descargar.
 
@@ -186,7 +195,7 @@ Restricciones: no da consejos médicos ni diagnósticos, no imputa sin consentim
 
 ## Limitaciones conocidas
 
-- **El modelo no ejecuta R ni calcula sobre el archivo completo.** El resultado de ejecutar un script (con el ejecutor aislado o a mano) no se le devuelve al modelo, así que las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que las pegues tú. Ninguno de los informes de `informes/` está verificado contra una ejecución en R, y el procedimiento con que se generaron no está documentado: trata sus cifras como no verificadas.
+- **El modelo no ejecuta R ni calcula sobre el archivo completo.** El resultado de ejecutar un script (con el ejecutor aislado o a mano) no se le devuelve al modelo, así que las cifras de un informe generado por el agente no están respaldadas por una corrida real salvo que las pegues tú. Los informes HTML de `informes/` no están verificados contra una ejecución en R y el procedimiento con que se generaron no está documentado: trata sus cifras como no verificadas. El artículo (`informes/Articulo.pdf`) se contrastó parcialmente el 2026-11-19 (ver [Verificación de resultados](#verificación-de-resultados)): la simetría coincide, pero hay errores en las Tablas 5 y 6 y en el texto que siguen sin corregir en la versión del PDF que está en el repositorio.
 - La regla de veracidad reduce el problema, pero un modelo de lenguaje puede incumplirla. Verifica antes de citar.
 - **Privacidad.** La app acepta cualquier CSV o Excel. Los nombres de columnas, el resumen estadístico y las frecuencias que construye viajan a la API de Gemini. Usa solo datos anonimizados.
 - A veces el agente asume predictores o contexto sin preguntar, o responde con un script cuando faltaba información.
@@ -222,22 +231,31 @@ Antes de citar una cifra del agente, ejecútala en R con el archivo correspondie
 | 2026-11-18 | train_limpio_imputado.csv | Código del agente (simetría), ejecutado por la app en el ejecutor aislado | χ² = 0.59109, df = 3, p = 0.8985; Kappa 0.2510 sin ponderar y 0.3076 ponderado | Sí |
 | 2026-11-18 | train_limpio_imputado.csv | Código del agente (pseudo R²), primera respuesta, en el ejecutor aislado | No se ejecutó: intentaba instalar un paquete que no está en la imagen y el ejecutor, sin red, falló | No (el aislamiento funcionó; el código no era autosuficiente) |
 | 2026-11-18 | train_limpio_imputado.csv | Código del agente (pseudo R²), segunda respuesta, en el ejecutor aislado | Coincide con los valores verificados (McFadden 0.358489, Cox-Snell 0.409133, Nagelkerke 0.531651, MAE 0.2537), según lo comprobado en esa ejecución | Sí |
+| 2026-11-19 | train_limpio_imputado.csv | `informes/Articulo.pdf`, Tabla 4: 10 pruebas de simetría izquierda-derecha (χ², gl, p) | `mcnemar.test` en las 10 pruebas: todos los valores coinciden (L4-L5 foraminal: 0.5911, 3, 0.8985) | Sí |
+| 2026-11-19 | train_limpio_imputado.csv | `informes/informe_hipotesis_y_clusters.pdf`: simetría foraminal L4/L5, p = 0.9757 | p = 0.8985 | No |
+| 2026-11-19 | train_limpio_imputado.csv | Artículo, Tabla 5: Nagelkerke, exactitud y MAE de los 5 niveles | L4-L5 coincide exactamente (0.545, 81.52 %, 0.2491); L5-S1 coincide en exactitud y MAE; los otros niveles quedan cerca (Nagelkerke a menos de 0.012) | Parcial |
+| 2026-11-19 | train_limpio_imputado.csv | Artículo, Tabla 5: AIC de los 5 niveles | 525.11, 924.23, 1434.37, 1843.98 y 552.22 (modelo con factores ordenados), contra 534.36, 931.16, 1436.47, 1844.73 y 552.14 | No (la diferencia es mayor en L1-L2 y L2-L3) |
+| 2026-11-19 | train_limpio_imputado.csv | Artículo, Tabla 6: 20 OR de `polr` | Son `exp(coeficiente .L)` del modelo con factores ordenados que ajusta `scripts/analisis_hipotesis_clusters_regresion.R`. 9 de 20 coinciden con menos de 0.5 % de diferencia y la mayoría del resto está cerca; L1-L2 difiere más (LSS_L: 11.023 contra 9.145). No se pudo establecer la causa | Parcial |
+| 2026-11-19 | train_limpio_imputado.csv | Artículo, Tabla 6 y texto: etiquetas "p < 0.001" en L2-L3 LFN_R y L3-L4 LFN_R | p de Wald 0.012 y 0.0013. L4-L5 LFN_L tiene p < 0.001 (el artículo dice p < 0.01) | No |
+| 2026-11-19 | Tabla 6 y ecuaciones del artículo (comprobación aritmética) | Ecuaciones (2) y (4): coeficiente de LFN_R en L1-L2 (0.7715) y en L3-L4 (0.2064) | No concuerdan con sus OR de la Tabla 6 (ln 0.695 = −0.364; ln 2.130 = 0.756). Las otras 18 ecuaciones sí | No |
+| 2026-11-19 | train_limpio_imputado.csv | Artículo: "incrementar un grado en estenosis subarticular eleva entre 4.7 y 19.9 veces" | Esos OR son del contraste lineal (`.L`) de un modelo con factores ordenados. Por grado, con predictores numéricos de 1 a 3, el OR de LSS va de 2.9 a 10.2 | No |
+| 2026-11-19 | train_limpio_imputado.csv | Artículo: "exactitud entre 78.4 % y 96.5 %", "MAE inferior a 0.31" | Exactitud de 81.52 % a 96.46 %; MAE máximo 0.2491. En L5-S1 la exactitud es igual a la de predecir siempre la moda (96.46 %) | No |
 
 Los pseudo R² se calcularon primero en la consola de RStudio y después se añadieron al script de verificación como bloque 5 (fórmulas: McFadden = 1 − ll1/ll0; Cox-Snell = 1 − exp(2/n·(ll0 − ll1)); Nagelkerke = Cox-Snell / (1 − exp(2/n·ll0)), con n = 1 975).
 
-El script que hizo la parte restante de esta verificación es `scripts/verificacion_codigo_agente.R` (R 4.6.0, DescTools 0.99.60, rcompanion 2.5.4, MASS 7.3.65). Las cifras del informe v2 salen de `informe_clinico (1).html`, generado con la versión v2 del prompt; el modelo del informe usaba predictores ordenados y el de la verificación no, así que la comparación de los OR es indicativa.
+El script que hizo la parte restante de esta verificación es `scripts/verificacion_codigo_agente.R` (R 4.6.0, DescTools 0.99.60, rcompanion 2.5.4, MASS 7.3.65). Las cifras del artículo se contrastaron con `scripts/verificacion_articulo.R`, cuya salida está en `documentacion/verificacion_articulo_salida.txt` (R 4.6.0, MASS 7.3.65; n = 1 975). La lista de correcciones propuestas al artículo está en `documentacion/correcciones_articulo.md`. No se verificaron la Tabla 2 (V de Cramér), las pruebas χ² de independencia, el MCA, los clusters ni la bibliografía contra las revistas. Las cifras del informe v2 salen de `informe_clinico (1).html`, generado con la versión v2 del prompt; el modelo del informe usaba predictores ordenados y el de la verificación no, así que la comparación de los OR es indicativa.
 
 ## Estructura del repositorio
 
 | Carpeta o archivo | Contenido |
 | --- | --- |
 | `app.py`, `main.py` | Dashboard en Streamlit y versión de consola |
-| `scripts/` | Scripts de R de análisis exploratorio, imputación y modelado; verificación del código del agente (`verificacion_codigo_agente.R`) y pruebas del ejecutor (`probar_ejecutor_r.sh`) |
+| `scripts/` | Scripts de R de análisis exploratorio, imputación y modelado; verificación del código del agente (`verificacion_codigo_agente.R`), verificación de las cifras del artículo (`verificacion_articulo.R`) y pruebas del ejecutor (`probar_ejecutor_r.sh`) |
 | `train.csv`, `train_limpio_imputado.csv` | Datos |
 | `linea-base.md` | Línea base: comparación del proceso manual con el agente bioestadístico |
 | `historial_*.md`, `historial_agente_bioestadistico.rtf` | Historiales de sesiones del agente, anteriores a la regla de veracidad; sin verificar |
 | `informes/` | Informes (HTML y PDF, cifras no verificadas), anteproyecto y revisión de fuentes |
-| `documentacion/` | Protocolo, corpus, banco de preguntas y configuración de NotebookLM (actividad "Nada sin fuente"); documentación de la app y versiones de los paquetes de R del ejecutor (`paquetes_R_ejecutor.csv`) |
+| `documentacion/` | Protocolo, corpus, banco de preguntas y configuración de NotebookLM (actividad "Nada sin fuente"); documentación de la app, versiones de los paquetes de R del ejecutor (`paquetes_R_ejecutor.csv`), salida de la verificación del artículo (`verificacion_articulo_salida.txt`) y correcciones propuestas (`correcciones_articulo.md`) |
 | `fuentes/` | PDF del corpus de estado del arte |
 | `experimento/` | Análisis del experimento de fuentes (clasificación de referencias) |
 | `entregables/`, `archivo/` | Entregables y memorias consolidadas |
